@@ -1,9 +1,11 @@
-# 🔍 Pega Visão
+<p align="center">
+  <img src="./public/logo.svg" alt="Pega Visão" width="320" />
+</p>
 
-**Quem conhece a rua, sabe onde olhar.**
-
-> IA e geoanálise a serviço do CompStat Municipal do Rio de Janeiro. 200 mil registros cruzados em minutos para orientar os 600 agentes da Força Municipal no território.
-
+<p align="center"><strong>Plataforma de Inteligência Criminal do CompStat Rio</strong></p>
+ 
+> De **horas** para **minutos**: cruzamento geoespacial automatizado e relatórios analíticos gerados por IA para as reuniões semanais do CompStat Municipal do Rio de Janeiro.
+ 
 ---
 
 ## Sumário

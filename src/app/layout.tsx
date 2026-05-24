@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "CompStat Rio",
-  description: "Plataforma de inteligência criminal para o CompStat Municipal do Rio de Janeiro",
+  title: "Pega Visão — Inteligência CompStat Rio",
+  description:
+    "Plataforma de inteligência criminal para o CompStat Municipal do Rio de Janeiro",
 };
 
 export default function RootLayout({
