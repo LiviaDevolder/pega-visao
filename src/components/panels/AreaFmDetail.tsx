@@ -1,14 +1,15 @@
 "use client";
 
-import { Box, Heading, Text, Stack, Badge, IconButton } from "@chakra-ui/react";
+import { Box, Button, Heading, Text, Stack, Badge, IconButton } from "@chakra-ui/react";
 import type { AreaFm } from "@/types/geo";
 
 interface AreaFmDetailProps {
   area: AreaFm;
   onClose: () => void;
+  onAnalyze?: (area: AreaFm) => void;
 }
 
-export function AreaFmDetail({ area, onClose }: AreaFmDetailProps) {
+export function AreaFmDetail({ area, onClose, onAnalyze }: AreaFmDetailProps) {
   return (
     <Box
       position="absolute"
@@ -60,6 +61,17 @@ export function AreaFmDetail({ area, onClose }: AreaFmDetailProps) {
             {area.total_fatores?.toLocaleString("pt-BR") || "—"}
           </Text>
         </Box>
+
+        {onAnalyze && (
+          <Button
+            size="sm"
+            colorPalette="purple"
+            mt={2}
+            onClick={() => onAnalyze(area)}
+          >
+            Analisar com IA
+          </Button>
+        )}
       </Stack>
     </Box>
   );

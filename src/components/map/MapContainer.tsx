@@ -22,6 +22,7 @@ import { MapControls } from "./MapControls";
 import { MapFiltersPanel } from "./MapFilters";
 import { RiskRadiusControl } from "./RiskRadiusControl";
 import { AreaFmDetail } from "../panels/AreaFmDetail";
+import { AreaAnalysisPanel } from "../panels/AreaAnalysisPanel";
 import { RiskTop10Panel } from "../panels/RiskTop10Panel";
 import { RiskDetailPanel } from "../panels/RiskDetailPanel";
 
@@ -37,6 +38,7 @@ export function MapView() {
   const [hotspots, setHotspots] = useState<RiskHotspot[]>([]);
   const [selectedArea, setSelectedArea] = useState<AreaFm | null>(null);
   const [selectedRiskArea, setSelectedRiskArea] = useState<RiskScore | null>(null);
+  const [analysisArea, setAnalysisArea] = useState<AreaFm | null>(null);
   const [radius, setRadius] = useState(200);
   const [filters, setFilters] = useState<MapFilters>({});
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -195,6 +197,18 @@ export function MapView() {
         <AreaFmDetail
           area={selectedArea}
           onClose={() => setSelectedArea(null)}
+          onAnalyze={(area) => {
+            setAnalysisArea(area);
+            setSelectedArea(null);
+          }}
+        />
+      )}
+
+      {analysisArea && (
+        <AreaAnalysisPanel
+          areaFmId={analysisArea.id}
+          areaName={analysisArea.nome_area_fm}
+          onClose={() => setAnalysisArea(null)}
         />
       )}
 
