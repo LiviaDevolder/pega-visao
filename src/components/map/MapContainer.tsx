@@ -28,6 +28,7 @@ import { RiskTop10Panel } from "../panels/RiskTop10Panel";
 import { RiskDetailPanel } from "../panels/RiskDetailPanel";
 import { FmSuggestionPanel } from "../panels/FmSuggestionPanel";
 import { FatoresUrbanosPanel } from "../panels/FatoresUrbanosPanel";
+import { BrandBadge } from "../BrandBadge";
 import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
@@ -170,6 +171,8 @@ export function MapView() {
           <FmAllocationLayer allocation={fmAllocation} areas={areas} />
         )}
       </LeafletMap>
+
+      <BrandBadge />
 
       <MapControls
         layers={layers}

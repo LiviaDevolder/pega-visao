@@ -1,6 +1,8 @@
-# 🔍 Pega Visão
- 
-**Plataforma de Inteligência Criminal do CompStat Rio**
+<p align="center">
+  <img src="./public/logo.svg" alt="Pega Visão" width="320" />
+</p>
+
+<p align="center"><strong>Plataforma de Inteligência Criminal do CompStat Rio</strong></p>
  
 > De **horas** para **minutos**: cruzamento geoespacial automatizado e relatórios analíticos gerados por IA para as reuniões semanais do CompStat Municipal do Rio de Janeiro.
  
