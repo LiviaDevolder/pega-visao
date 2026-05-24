@@ -134,13 +134,32 @@ export async function getRiskScoring(): Promise<RiskScore[]> {
   }
 }
 
-export async function getRiskHotspots(
+function mapHotspotRow(r: Record<string, unknown>): RiskHotspot {
+  return {
+    latitude: Number(r.latitude),
+    longitude: Number(r.longitude),
+    logradouro: r.logradouro as string | null,
+    ocorrencias_no_raio: Number(r.ocorrencias_no_raio),
+    fatores_no_raio: Number(r.fatores_no_raio),
+    denuncias_no_raio: Number(r.denuncias_no_raio),
+    score: Number(r.score),
+  };
+}
+
+async function getRiskHotspotsFast(): Promise<RiskHotspot[]> {
+  const rows = await sql(`
+    SELECT latitude, longitude, logradouro,
+           ocorrencias_no_raio, fatores_no_raio, denuncias_no_raio, score
+    FROM hotspots_mv
+    ORDER BY score DESC
+    LIMIT 10
+  `);
+  return rows.map(mapHotspotRow);
+}
+
+async function getRiskHotspotsSlow(
   radiusMeters: number
 ): Promise<RiskHotspot[]> {
-  // Pré-agrega ocorrências em células de ~100m (ST_SnapToGrid 0.001°), pega as
-  // 500 células mais densas como candidatas e só então faz 3 spatial joins
-  // (LATERAL + ST_DWithin) usando o índice GIST. Substitui a varredura O(N²) de
-  // subqueries correlatas sobre ~30k pontos distintos.
   const rows = await sql(
     `
     WITH cell_counts AS (
@@ -163,9 +182,7 @@ export async function getRiskHotspots(
       FROM cell_counts
     )
     SELECT
-      c.latitude,
-      c.longitude,
-      c.logradouro,
+      c.latitude, c.longitude, c.logradouro,
       oc.cnt AS ocorrencias_no_raio,
       fc.cnt AS fatores_no_raio,
       dc.cnt AS denuncias_no_raio,
@@ -189,16 +206,24 @@ export async function getRiskHotspots(
   `,
     [radiusMeters]
   );
+  return rows.map(mapHotspotRow);
+}
 
-  return rows.map((r: Record<string, unknown>) => ({
-    latitude: Number(r.latitude),
-    longitude: Number(r.longitude),
-    logradouro: r.logradouro as string | null,
-    ocorrencias_no_raio: Number(r.ocorrencias_no_raio),
-    fatores_no_raio: Number(r.fatores_no_raio),
-    denuncias_no_raio: Number(r.denuncias_no_raio),
-    score: Number(r.score),
-  }));
+export async function getRiskHotspots(
+  radiusMeters: number
+): Promise<RiskHotspot[]> {
+  try {
+    return await getRiskHotspotsFast();
+  } catch (err) {
+    const msg = String(err);
+    if (msg.includes("does not exist") || msg.includes("hotspots_mv")) {
+      console.warn(
+        "hotspots_mv nao existe — usando query lenta. Rode db/migrations/003_hotspots_mv.sql para acelerar."
+      );
+      return getRiskHotspotsSlow(radiusMeters);
+    }
+    throw err;
+  }
 }
 
 export async function getRiskDetail(areaFmId: number) {
