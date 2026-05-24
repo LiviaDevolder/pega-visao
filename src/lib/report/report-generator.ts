@@ -4,14 +4,8 @@ import {
   type ReportData,
   type PerguntaNorteadoraReport,
 } from "./relint-template";
-import { aggregateAreaData } from "../area-data-aggregator";
-import { buildAreaAnalysisPrompt } from "../ai/prompts/area-analysis";
-import { generateAnalysis } from "../ai/anthropic-client";
+import { getAreaAnalysisBundle } from "../analysis-service";
 import { getActionSuggestion } from "../action-plan-builder";
-import {
-  buildGenericFallback,
-  getFallbackByAreaId,
-} from "../ai/demo-fallbacks";
 import type { AreaAnalysis } from "@/types/analysis";
 
 const PERGUNTAS_LABELS: Record<
@@ -26,76 +20,12 @@ const PERGUNTAS_LABELS: Record<
     "Fatores estao sendo resolvidos pelos orgaos complementares?",
 };
 
-function isValidAnalysis(value: unknown): value is AreaAnalysis {
-  if (!value || typeof value !== "object") return false;
-  const v = value as Record<string, unknown>;
-  if (typeof v.resumo_executivo !== "string") return false;
-  if (typeof v.dinamica_criminal !== "string") return false;
-  const pn = v.perguntas_norteadoras as Record<string, unknown> | undefined;
-  if (!pn || typeof pn !== "object") return false;
-  for (const key of [
-    "rota_fm",
-    "horario_qmd",
-    "modelo_emprego",
-    "fatores_orgaos",
-  ]) {
-    const p = pn[key] as Record<string, unknown> | undefined;
-    if (
-      !p ||
-      typeof p.diagnostico !== "string" ||
-      typeof p.sugestao !== "string"
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function extractJson(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
-}
-
 export async function generateReport(
   areaFmId: number,
   periodoInicio?: string,
   periodoFim?: string
 ): Promise<Buffer> {
-  const areaData = await aggregateAreaData(areaFmId);
-
-  const demoMode = process.env.DEMO_MODE === "true";
-  let analysis: AreaAnalysis | null = null;
-
-  if (demoMode) {
-    analysis =
-      getFallbackByAreaId(areaFmId) ?? buildGenericFallback(areaData);
-  } else {
-    try {
-      const prompt = buildAreaAnalysisPrompt(areaData);
-      const aiResponse = await generateAnalysis(prompt);
-      const parsed = extractJson(aiResponse);
-      if (isValidAnalysis(parsed)) {
-        analysis = parsed;
-      }
-    } catch (err) {
-      console.error("Falha na chamada da IA para relatorio:", err);
-    }
-    if (!analysis) {
-      analysis =
-        getFallbackByAreaId(areaFmId) ?? buildGenericFallback(areaData);
-    }
-  }
+  const { areaData, analysis } = await getAreaAnalysisBundle(areaFmId);
 
   const periodo =
     periodoInicio && periodoFim
@@ -114,8 +44,8 @@ export async function generateReport(
     >
   ).map((key) => ({
     pergunta: PERGUNTAS_LABELS[key],
-    diagnostico: analysis!.perguntas_norteadoras[key].diagnostico,
-    sugestao: analysis!.perguntas_norteadoras[key].sugestao,
+    diagnostico: analysis.perguntas_norteadoras[key].diagnostico,
+    sugestao: analysis.perguntas_norteadoras[key].sugestao,
   }));
 
   const fatoresUrbanos = areaData.fatores_por_orgao.map((f) => ({
