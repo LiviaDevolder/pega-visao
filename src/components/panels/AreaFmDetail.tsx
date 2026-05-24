@@ -2,6 +2,7 @@
 
 import { Box, Button, Heading, Text, Stack, Badge, IconButton } from "@chakra-ui/react";
 import type { AreaFm } from "@/types/geo";
+import { ReportButton } from "./ReportButton";
 
 interface AreaFmDetailProps {
   area: AreaFm;
@@ -62,16 +63,18 @@ export function AreaFmDetail({ area, onClose, onAnalyze }: AreaFmDetailProps) {
           </Text>
         </Box>
 
-        {onAnalyze && (
-          <Button
-            size="sm"
-            colorPalette="purple"
-            mt={2}
-            onClick={() => onAnalyze(area)}
-          >
-            Analisar com IA
-          </Button>
-        )}
+        <Box display="flex" gap={2} mt={2}>
+          {onAnalyze && (
+            <Button
+              size="sm"
+              colorPalette="purple"
+              onClick={() => onAnalyze(area)}
+            >
+              Analisar com IA
+            </Button>
+          )}
+          <ReportButton areaFmId={area.id} areaName={area.nome_area_fm} />
+        </Box>
       </Stack>
     </Box>
   );
