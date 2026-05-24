@@ -29,6 +29,7 @@ import { RiskDetailPanel } from "../panels/RiskDetailPanel";
 import { FmSuggestionPanel } from "../panels/FmSuggestionPanel";
 import { FatoresUrbanosPanel } from "../panels/FatoresUrbanosPanel";
 import { BrandBadge } from "../BrandBadge";
+import { SocialFeedPanel } from "../panels/SocialFeedPanel";
 import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
@@ -45,6 +46,7 @@ export function MapView() {
   const [selectedRiskArea, setSelectedRiskArea] = useState<RiskScore | null>(null);
   const [analysisArea, setAnalysisArea] = useState<AreaFm | null>(null);
   const [showFmSuggestion, setShowFmSuggestion] = useState(false);
+  const [showSocialFeed, setShowSocialFeed] = useState(false);
   const [fmAllocation, setFmAllocation] = useState<FmAllocation[] | null>(null);
   const [fatoresArea, setFatoresArea] = useState<AreaFm | null>(null);
   const [radius, setRadius] = useState(200);
@@ -183,6 +185,7 @@ export function MapView() {
         onToggle={handleLayerToggle}
         loading={loading || riskLoading}
         onOpenFmSuggestion={() => setShowFmSuggestion(true)}
+        onOpenSocialFeed={() => setShowSocialFeed(true)}
       />
 
       <MapFiltersPanel filters={filters} onFilterChange={handleFilterChange} />
@@ -257,6 +260,10 @@ export function MapView() {
           areaName={fatoresArea.nome_area_fm}
           onClose={() => setFatoresArea(null)}
         />
+      )}
+
+      {showSocialFeed && (
+        <SocialFeedPanel onClose={() => setShowSocialFeed(false)} />
       )}
     </Box>
   );

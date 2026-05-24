@@ -9,6 +9,7 @@ interface MapControlsProps {
   onToggle: (layer: keyof LayerVisibility) => void;
   loading: boolean;
   onOpenFmSuggestion?: () => void;
+  onOpenSocialFeed?: () => void;
 }
 
 const LAYER_LABELS: Record<keyof LayerVisibility, string> = {
@@ -27,7 +28,7 @@ const LAYER_COLORS: Record<keyof LayerVisibility, string> = {
   riskZones: "orange",
 };
 
-export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion }: MapControlsProps) {
+export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion, onOpenSocialFeed }: MapControlsProps) {
   return (
     <Box
       position="absolute"
@@ -53,6 +54,17 @@ export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion }: M
             onClick={onOpenFmSuggestion}
           >
             Sugestao FM
+          </Button>
+        )}
+
+        {onOpenSocialFeed && (
+          <Button
+            size="xs"
+            colorPalette="purple"
+            variant="outline"
+            onClick={onOpenSocialFeed}
+          >
+            Feed Social
           </Button>
         )}
 
