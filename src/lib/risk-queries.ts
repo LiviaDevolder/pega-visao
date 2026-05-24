@@ -107,36 +107,53 @@ export async function getRiskScoring(): Promise<RiskScore[]> {
 export async function getRiskHotspots(
   radiusMeters: number
 ): Promise<RiskHotspot[]> {
+  // Pré-agrega ocorrências em células de ~100m (ST_SnapToGrid 0.001°), pega as
+  // 500 células mais densas como candidatas e só então faz 3 spatial joins
+  // (LATERAL + ST_DWithin) usando o índice GIST. Substitui a varredura O(N²) de
+  // subqueries correlatas sobre ~30k pontos distintos.
   const rows = await sql(
     `
-    WITH hotspot_candidates AS (
-      SELECT DISTINCT ON (ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3))
-        latitude, longitude, locf as logradouro, geom
+    WITH cell_counts AS (
+      SELECT
+        ST_SnapToGrid(geom, 0.001) AS cell,
+        COUNT(*) AS ocorrencias_cell_count,
+        (array_agg(locf) FILTER (WHERE locf IS NOT NULL))[1] AS logradouro
       FROM ocorrencias
       WHERE geom IS NOT NULL
-      ORDER BY ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3), id
+      GROUP BY ST_SnapToGrid(geom, 0.001)
+      ORDER BY COUNT(*) DESC
+      LIMIT 500
     ),
-    scored_points AS (
+    candidates AS (
       SELECT
-        hc.latitude,
-        hc.longitude,
-        hc.logradouro,
-        (SELECT COUNT(*) FROM ocorrencias o2
-         WHERE ST_DWithin(hc.geom::geography, o2.geom::geography, $1)) as ocorrencias_no_raio,
-        (SELECT COUNT(*) FROM fatores_urbanos f
-         WHERE f.geom IS NOT NULL AND ST_DWithin(hc.geom::geography, f.geom::geography, $1)) as fatores_no_raio,
-        (SELECT COUNT(*) FROM denuncias d
-         WHERE d.geom IS NOT NULL AND ST_DWithin(hc.geom::geography, d.geom::geography, $1)) as denuncias_no_raio
-      FROM hotspot_candidates hc
+        cell::geography AS geog,
+        ST_Y(cell) AS latitude,
+        ST_X(cell) AS longitude,
+        logradouro
+      FROM cell_counts
     )
     SELECT
-      latitude, longitude, logradouro,
-      ocorrencias_no_raio::int,
-      fatores_no_raio::int,
-      denuncias_no_raio::int,
-      (ocorrencias_no_raio * (1 + fatores_no_raio) * (1 + denuncias_no_raio))::float as score
-    FROM scored_points
-    WHERE fatores_no_raio > 0 OR denuncias_no_raio > 0
+      c.latitude,
+      c.longitude,
+      c.logradouro,
+      oc.cnt AS ocorrencias_no_raio,
+      fc.cnt AS fatores_no_raio,
+      dc.cnt AS denuncias_no_raio,
+      (oc.cnt::float * (1 + fc.cnt) * (1 + dc.cnt)) AS score
+    FROM candidates c
+    CROSS JOIN LATERAL (
+      SELECT COUNT(*)::int AS cnt FROM ocorrencias o
+      WHERE o.geom IS NOT NULL AND ST_DWithin(c.geog, o.geom::geography, $1)
+    ) oc
+    CROSS JOIN LATERAL (
+      SELECT COUNT(*)::int AS cnt FROM fatores_urbanos f
+      WHERE f.geom IS NOT NULL AND ST_DWithin(c.geog, f.geom::geography, $1)
+    ) fc
+    CROSS JOIN LATERAL (
+      SELECT COUNT(*)::int AS cnt FROM denuncias d
+      WHERE d.geom IS NOT NULL AND ST_DWithin(c.geog, d.geom::geography, $1)
+    ) dc
+    WHERE fc.cnt > 0 OR dc.cnt > 0
     ORDER BY score DESC
     LIMIT 10
   `,
