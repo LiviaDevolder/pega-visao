@@ -2,6 +2,9 @@
   <img src="./public/logo.svg" alt="Pega Visão" width="320" />
 </p>
 
+<p align="center">
+  🔗 <a href="https://www.pegavisao.xyz/"><strong>Pega Visão</strong></a>
+</p>
 <p align="center"><strong>Plataforma de Inteligência Criminal do CompStat Rio</strong></p>
  
 > De **horas** para **minutos**: cruzamento geoespacial automatizado e relatórios analíticos gerados por IA para as reuniões semanais do CompStat Municipal do Rio de Janeiro.
@@ -59,7 +62,7 @@ gerar relatorios mais precisos
 ### 🗺️ Mapa Interativo
 Mancha criminal, fatores urbanos, câmeras e os 22 polígonos da FM em camadas controláveis com filtros temporais e por tipologia.
 
-
+<img src="./public/pega_visao.png" alt="Pega Visão" width="600" />
 
 ### ⚠️ Coincidências de Alto Risco
 Identificação automática de pontos onde crime + fator urbano + denúncia se sobrepõem no mesmo raio, com scoring de criticidade para priorização.
@@ -67,11 +70,19 @@ Identificação automática de pontos onde crime + fator urbano + denúncia se s
 ### 🤖 Análise de Área por IA
 Síntese executiva, série temporal, dinâmica criminal e diagnóstico de fatores urbanos — tudo gerado por IA e pronto para a reunião semanal.
 
+<img src="./public/analise_ia.png" alt="Pega Visão" width="600" />
+
+
 ### 📄 Geração de RELINT em `.docx`
 Relatório de Inteligência exportado com um clique, já no formato padronizado do CompStat.
 
+<img src="./public/relatorio.png" alt="Pega Visão" width="600" />
+
 ### 👮 Sugestão de Cobertura da FM
 Distribuição otimizada dos 600 agentes pelas 22 áreas, com modelo de emprego (a pé, moto ou viatura) e turnos prioritários baseados na série temporal de ocorrências.
+
+<img src="./public/cobertura.png" alt="Pega Visão" width="600" />
+
 
 ### 🏗️ Plano de Ação por Órgão
 Fatores urbanos agrupados por responsável (Comlurb, RioLuz, SEOP, CET-Rio, SMAS…) e priorizados por risco, prontos para encaminhamento intersetorial.
@@ -169,14 +180,6 @@ pega-visao/
 Os dados utilizados são fornecidos pelo CompStat Municipal e estão em `base_data/`. Consulte [`base_data/README.md`](base_data/README.md) para o dicionário completo de campos e as instruções de importação detalhadas em `scripts/`.
 
 > **Nota:** os dados reais são sensíveis e não são versionados. O repositório inclui apenas amostras anonimizadas para desenvolvimento.
-
-## Roadmap
-
-- [ ] Dashboard de indicadores consolidados por área
-- [ ] Comparativo temporal (semana atual vs. anteriores)
-- [ ] Alertas automáticos para picos de ocorrências
-- [ ] Exportação de briefing em PDF para reuniões
-- [ ] Integração com fontes externas (Waze, clima, eventos)
 
 ## Créditos
 
