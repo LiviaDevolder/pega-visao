@@ -8,9 +8,10 @@ interface AreaFmDetailProps {
   area: AreaFm;
   onClose: () => void;
   onAnalyze?: (area: AreaFm) => void;
+  onShowFatores?: (area: AreaFm) => void;
 }
 
-export function AreaFmDetail({ area, onClose, onAnalyze }: AreaFmDetailProps) {
+export function AreaFmDetail({ area, onClose, onAnalyze, onShowFatores }: AreaFmDetailProps) {
   return (
     <Box
       position="absolute"
@@ -63,7 +64,7 @@ export function AreaFmDetail({ area, onClose, onAnalyze }: AreaFmDetailProps) {
           </Text>
         </Box>
 
-        <Box display="flex" gap={2} mt={2}>
+        <Box display="flex" gap={2} mt={2} flexWrap="wrap">
           {onAnalyze && (
             <Button
               size="sm"
@@ -71,6 +72,15 @@ export function AreaFmDetail({ area, onClose, onAnalyze }: AreaFmDetailProps) {
               onClick={() => onAnalyze(area)}
             >
               Analisar com IA
+            </Button>
+          )}
+          {onShowFatores && (
+            <Button
+              size="sm"
+              colorPalette="orange"
+              onClick={() => onShowFatores(area)}
+            >
+              Fatores Urbanos
             </Button>
           )}
           <ReportButton areaFmId={area.id} areaName={area.nome_area_fm} />

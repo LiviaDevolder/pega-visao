@@ -27,6 +27,7 @@ import { AreaAnalysisPanel } from "../panels/AreaAnalysisPanel";
 import { RiskTop10Panel } from "../panels/RiskTop10Panel";
 import { RiskDetailPanel } from "../panels/RiskDetailPanel";
 import { FmSuggestionPanel } from "../panels/FmSuggestionPanel";
+import { FatoresUrbanosPanel } from "../panels/FatoresUrbanosPanel";
 import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
@@ -44,6 +45,7 @@ export function MapView() {
   const [analysisArea, setAnalysisArea] = useState<AreaFm | null>(null);
   const [showFmSuggestion, setShowFmSuggestion] = useState(false);
   const [fmAllocation, setFmAllocation] = useState<FmAllocation[] | null>(null);
+  const [fatoresArea, setFatoresArea] = useState<AreaFm | null>(null);
   const [radius, setRadius] = useState(200);
   const [filters, setFilters] = useState<MapFilters>({});
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -210,6 +212,10 @@ export function MapView() {
             setAnalysisArea(area);
             setSelectedArea(null);
           }}
+          onShowFatores={(area) => {
+            setFatoresArea(area);
+            setSelectedArea(null);
+          }}
         />
       )}
 
@@ -235,6 +241,14 @@ export function MapView() {
         <RiskDetailPanel
           area={selectedRiskArea}
           onClose={() => setSelectedRiskArea(null)}
+        />
+      )}
+
+      {fatoresArea && (
+        <FatoresUrbanosPanel
+          areaFmId={fatoresArea.id}
+          areaName={fatoresArea.nome_area_fm}
+          onClose={() => setFatoresArea(null)}
         />
       )}
     </Box>
