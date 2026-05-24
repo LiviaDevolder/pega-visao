@@ -18,6 +18,7 @@ import { FatoresUrbanosLayer } from "./layers/FatoresUrbanosLayer";
 import { AreasFmLayer } from "./layers/AreasFmLayer";
 import { CamerasLayer } from "./layers/CamerasLayer";
 import { RiskZonesLayer } from "./layers/RiskZonesLayer";
+import { FmAllocationLayer } from "./layers/FmAllocationLayer";
 import { MapControls } from "./MapControls";
 import { MapFiltersPanel } from "./MapFilters";
 import { RiskRadiusControl } from "./RiskRadiusControl";
@@ -25,6 +26,8 @@ import { AreaFmDetail } from "../panels/AreaFmDetail";
 import { AreaAnalysisPanel } from "../panels/AreaAnalysisPanel";
 import { RiskTop10Panel } from "../panels/RiskTop10Panel";
 import { RiskDetailPanel } from "../panels/RiskDetailPanel";
+import { FmSuggestionPanel } from "../panels/FmSuggestionPanel";
+import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
 const DEFAULT_ZOOM = 12;
@@ -39,6 +42,8 @@ export function MapView() {
   const [selectedArea, setSelectedArea] = useState<AreaFm | null>(null);
   const [selectedRiskArea, setSelectedRiskArea] = useState<RiskScore | null>(null);
   const [analysisArea, setAnalysisArea] = useState<AreaFm | null>(null);
+  const [showFmSuggestion, setShowFmSuggestion] = useState(false);
+  const [fmAllocation, setFmAllocation] = useState<FmAllocation[] | null>(null);
   const [radius, setRadius] = useState(200);
   const [filters, setFilters] = useState<MapFilters>({});
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -159,12 +164,16 @@ export function MapView() {
           <RiskZonesLayer areas={riskScores} onAreaClick={handleRiskAreaClick} />
         )}
         {layers.cameras && <CamerasLayer cameras={cameras} />}
+        {fmAllocation && (
+          <FmAllocationLayer allocation={fmAllocation} areas={areas} />
+        )}
       </LeafletMap>
 
       <MapControls
         layers={layers}
         onToggle={handleLayerToggle}
         loading={loading}
+        onOpenFmSuggestion={() => setShowFmSuggestion(true)}
       />
 
       <MapFiltersPanel filters={filters} onFilterChange={handleFilterChange} />
@@ -209,6 +218,16 @@ export function MapView() {
           areaFmId={analysisArea.id}
           areaName={analysisArea.nome_area_fm}
           onClose={() => setAnalysisArea(null)}
+        />
+      )}
+
+      {showFmSuggestion && (
+        <FmSuggestionPanel
+          onClose={() => setShowFmSuggestion(false)}
+          onShowOnMap={(alloc) => {
+            setFmAllocation(alloc);
+            setShowFmSuggestion(false);
+          }}
         />
       )}
 

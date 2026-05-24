@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, Text, Spinner } from "@chakra-ui/react";
+import { Box, Stack, Text, Spinner, Button } from "@chakra-ui/react";
 import { Switch } from "@chakra-ui/react";
 import type { LayerVisibility } from "@/types/geo";
 
@@ -8,6 +8,7 @@ interface MapControlsProps {
   layers: LayerVisibility;
   onToggle: (layer: keyof LayerVisibility) => void;
   loading: boolean;
+  onOpenFmSuggestion?: () => void;
 }
 
 const LAYER_LABELS: Record<keyof LayerVisibility, string> = {
@@ -26,7 +27,7 @@ const LAYER_COLORS: Record<keyof LayerVisibility, string> = {
   riskZones: "orange",
 };
 
-export function MapControls({ layers, onToggle, loading }: MapControlsProps) {
+export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion }: MapControlsProps) {
   return (
     <Box
       position="absolute"
@@ -43,6 +44,17 @@ export function MapControls({ layers, onToggle, loading }: MapControlsProps) {
         <Text fontWeight="bold" fontSize="sm" color="gray.700">
           Camadas {loading && <Spinner size="xs" ml={2} />}
         </Text>
+
+        {onOpenFmSuggestion && (
+          <Button
+            size="xs"
+            colorPalette="blue"
+            variant="outline"
+            onClick={onOpenFmSuggestion}
+          >
+            Sugestao FM
+          </Button>
+        )}
 
         {(Object.keys(LAYER_LABELS) as Array<keyof LayerVisibility>).map(
           (layer) => (
