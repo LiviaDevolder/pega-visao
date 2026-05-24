@@ -22,7 +22,63 @@ export interface RiskHotspot {
   score: number;
 }
 
-export async function getRiskScoring(): Promise<RiskScore[]> {
+function mapRiskRow(r: Record<string, unknown>): RiskScore {
+  return {
+    id: Number(r.id),
+    nome_area_fm: r.nome_area_fm as string,
+    geojson: r.geojson as string,
+    ocorrencias_count: Number(r.ocorrencias_count),
+    fatores_count: Number(r.fatores_count),
+    denuncias_count: Number(r.denuncias_count),
+    area_km2: Number(r.area_km2),
+    risk_score: Number(r.risk_score),
+    risk_level: r.risk_level as "baixo" | "medio" | "alto",
+  };
+}
+
+const SCORED_AND_RANKED = `
+  scored AS (
+    SELECT
+      *,
+      CASE WHEN area_km2 > 0
+        THEN (ocorrencias_count::float / area_km2) *
+             (1 + fatores_count::float / GREATEST(1, (SELECT MAX(fatores_count) FROM area_stats))) *
+             (1 + denuncias_count::float / GREATEST(1, (SELECT MAX(denuncias_count) FROM area_stats)))
+        ELSE 0
+      END as raw_score
+    FROM area_stats
+  ),
+  normalized AS (
+    SELECT
+      *,
+      CASE WHEN (SELECT MAX(raw_score) FROM scored) > 0
+        THEN raw_score / (SELECT MAX(raw_score) FROM scored)
+        ELSE 0
+      END as risk_score
+    FROM scored
+  )
+  SELECT
+    id, nome_area_fm, geojson, area_km2,
+    ocorrencias_count::int, fatores_count::int, denuncias_count::int,
+    ROUND(risk_score::numeric, 4) as risk_score,
+    CASE
+      WHEN risk_score >= 0.66 THEN 'alto'
+      WHEN risk_score >= 0.33 THEN 'medio'
+      ELSE 'baixo'
+    END as risk_level
+  FROM normalized
+  ORDER BY risk_score DESC
+`;
+
+async function getRiskScoringFast(): Promise<RiskScore[]> {
+  const rows = await sql(`
+    WITH area_stats AS (SELECT * FROM area_stats_mv),
+    ${SCORED_AND_RANKED}
+  `);
+  return rows.map(mapRiskRow);
+}
+
+async function getRiskScoringSlow(): Promise<RiskScore[]> {
   const rows = await sql(`
     WITH ocorrencias_por_area AS (
       SELECT a.id, COUNT(o.*)::int as total
@@ -58,59 +114,52 @@ export async function getRiskScoring(): Promise<RiskScore[]> {
       LEFT JOIN fatores_por_area fa ON fa.id = a.id
       LEFT JOIN denuncias_por_area da ON da.id = a.id
     ),
-    scored AS (
-      SELECT
-        *,
-        CASE WHEN area_km2 > 0
-          THEN (ocorrencias_count::float / area_km2) *
-               (1 + fatores_count::float / GREATEST(1, (SELECT MAX(fatores_count) FROM area_stats))) *
-               (1 + denuncias_count::float / GREATEST(1, (SELECT MAX(denuncias_count) FROM area_stats)))
-          ELSE 0
-        END as raw_score
-      FROM area_stats
-    ),
-    normalized AS (
-      SELECT
-        *,
-        CASE WHEN (SELECT MAX(raw_score) FROM scored) > 0
-          THEN raw_score / (SELECT MAX(raw_score) FROM scored)
-          ELSE 0
-        END as risk_score
-      FROM scored
-    )
-    SELECT
-      id, nome_area_fm, geojson, area_km2,
-      ocorrencias_count::int, fatores_count::int, denuncias_count::int,
-      ROUND(risk_score::numeric, 4) as risk_score,
-      CASE
-        WHEN risk_score >= 0.66 THEN 'alto'
-        WHEN risk_score >= 0.33 THEN 'medio'
-        ELSE 'baixo'
-      END as risk_level
-    FROM normalized
-    ORDER BY risk_score DESC
+    ${SCORED_AND_RANKED}
   `);
-
-  return rows.map((r: Record<string, unknown>) => ({
-    id: Number(r.id),
-    nome_area_fm: r.nome_area_fm as string,
-    geojson: r.geojson as string,
-    ocorrencias_count: Number(r.ocorrencias_count),
-    fatores_count: Number(r.fatores_count),
-    denuncias_count: Number(r.denuncias_count),
-    area_km2: Number(r.area_km2),
-    risk_score: Number(r.risk_score),
-    risk_level: r.risk_level as "baixo" | "medio" | "alto",
-  }));
+  return rows.map(mapRiskRow);
 }
 
-export async function getRiskHotspots(
+export async function getRiskScoring(): Promise<RiskScore[]> {
+  try {
+    return await getRiskScoringFast();
+  } catch (err) {
+    const msg = String(err);
+    if (msg.includes("does not exist") || msg.includes("area_stats_mv")) {
+      console.warn(
+        "area_stats_mv nao existe — usando query lenta. Rode db/migrations/002_area_stats_mv.sql para acelerar."
+      );
+      return getRiskScoringSlow();
+    }
+    throw err;
+  }
+}
+
+function mapHotspotRow(r: Record<string, unknown>): RiskHotspot {
+  return {
+    latitude: Number(r.latitude),
+    longitude: Number(r.longitude),
+    logradouro: r.logradouro as string | null,
+    ocorrencias_no_raio: Number(r.ocorrencias_no_raio),
+    fatores_no_raio: Number(r.fatores_no_raio),
+    denuncias_no_raio: Number(r.denuncias_no_raio),
+    score: Number(r.score),
+  };
+}
+
+async function getRiskHotspotsFast(): Promise<RiskHotspot[]> {
+  const rows = await sql(`
+    SELECT latitude, longitude, logradouro,
+           ocorrencias_no_raio, fatores_no_raio, denuncias_no_raio, score
+    FROM hotspots_mv
+    ORDER BY score DESC
+    LIMIT 10
+  `);
+  return rows.map(mapHotspotRow);
+}
+
+async function getRiskHotspotsSlow(
   radiusMeters: number
 ): Promise<RiskHotspot[]> {
-  // Pré-agrega ocorrências em células de ~100m (ST_SnapToGrid 0.001°), pega as
-  // 500 células mais densas como candidatas e só então faz 3 spatial joins
-  // (LATERAL + ST_DWithin) usando o índice GIST. Substitui a varredura O(N²) de
-  // subqueries correlatas sobre ~30k pontos distintos.
   const rows = await sql(
     `
     WITH cell_counts AS (
@@ -133,9 +182,7 @@ export async function getRiskHotspots(
       FROM cell_counts
     )
     SELECT
-      c.latitude,
-      c.longitude,
-      c.logradouro,
+      c.latitude, c.longitude, c.logradouro,
       oc.cnt AS ocorrencias_no_raio,
       fc.cnt AS fatores_no_raio,
       dc.cnt AS denuncias_no_raio,
@@ -159,16 +206,24 @@ export async function getRiskHotspots(
   `,
     [radiusMeters]
   );
+  return rows.map(mapHotspotRow);
+}
 
-  return rows.map((r: Record<string, unknown>) => ({
-    latitude: Number(r.latitude),
-    longitude: Number(r.longitude),
-    logradouro: r.logradouro as string | null,
-    ocorrencias_no_raio: Number(r.ocorrencias_no_raio),
-    fatores_no_raio: Number(r.fatores_no_raio),
-    denuncias_no_raio: Number(r.denuncias_no_raio),
-    score: Number(r.score),
-  }));
+export async function getRiskHotspots(
+  radiusMeters: number
+): Promise<RiskHotspot[]> {
+  try {
+    return await getRiskHotspotsFast();
+  } catch (err) {
+    const msg = String(err);
+    if (msg.includes("does not exist") || msg.includes("hotspots_mv")) {
+      console.warn(
+        "hotspots_mv nao existe — usando query lenta. Rode db/migrations/003_hotspots_mv.sql para acelerar."
+      );
+      return getRiskHotspotsSlow(radiusMeters);
+    }
+    throw err;
+  }
 }
 
 export async function getRiskDetail(areaFmId: number) {
