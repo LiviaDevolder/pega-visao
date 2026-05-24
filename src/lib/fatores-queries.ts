@@ -21,26 +21,33 @@ export interface FatoresPorOrgao {
 export async function getFatoresByAreaFm(
   areaFmId: number
 ): Promise<FatoresPorOrgao[]> {
-  const rows = await sql(
+  // Densidade media de ocorrencias por km2 (todas as 22 areas) — single scan
+  // com indice GIST. Evita subqueries correlatas dentro do CASE, que causavam
+  // timeout em produção (mesmo padrao do bug do BINGO, ver commit 832ef1e).
+  const densityRows = await sql(
     `
-    WITH area_risk AS (
+    WITH areas_density AS (
       SELECT
         a.id,
-        a.geom,
-        CASE
-          WHEN (SELECT COUNT(*) FROM ocorrencias o WHERE ST_Contains(a.geom, o.geom))::float /
-               GREATEST(1, ST_Area(a.geom::geography) / 1000000.0) >
-               (SELECT AVG(cnt / GREATEST(1, ar))
-                FROM (SELECT COUNT(*) as cnt, ST_Area(geom::geography)/1000000.0 as ar
-                      FROM areas_fm a2
-                      JOIN ocorrencias o ON ST_Contains(a2.geom, o.geom)
-                      GROUP BY a2.id, a2.geom) sub)
-          THEN 'alto'
-          ELSE 'medio'
-        END as risk_level
+        COUNT(o.*)::float / GREATEST(1, ST_Area(a.geom::geography) / 1000000.0) as density
       FROM areas_fm a
-      WHERE a.id = $1
+      LEFT JOIN ocorrencias o ON ST_Contains(a.geom, o.geom)
+      GROUP BY a.id, a.geom
     )
+    SELECT
+      (SELECT density FROM areas_density WHERE id = $1) as target_density,
+      (SELECT AVG(density) FROM areas_density) as avg_density
+  `,
+    [areaFmId]
+  );
+
+  const dRow = (densityRows[0] || {}) as Record<string, unknown>;
+  const targetDensity = Number(dRow.target_density ?? 0);
+  const avgDensity = Number(dRow.avg_density ?? 0);
+  const riskLevel = targetDensity > avgDensity ? "alto" : "medio";
+
+  const rows = await sql(
+    `
     SELECT
       f.id,
       f.tipo_ocorrencia_descricao,
@@ -49,13 +56,11 @@ export async function getFatoresByAreaFm(
       f.observacao,
       f.bairro_nome,
       f.latitude,
-      f.longitude,
-      ar.risk_level
+      f.longitude
     FROM fatores_urbanos f
-    JOIN area_risk ar ON ST_Contains(ar.geom, f.geom)
-    WHERE f.geom IS NOT NULL
+    JOIN areas_fm a ON ST_Contains(a.geom, f.geom)
+    WHERE a.id = $1 AND f.geom IS NOT NULL
     ORDER BY
-      CASE ar.risk_level WHEN 'alto' THEN 0 ELSE 1 END,
       f.orgao_responsavel,
       f.tipo_ocorrencia_descricao
   `,
@@ -77,7 +82,7 @@ export async function getFatoresByAreaFm(
       bairro_nome: row.bairro_nome as string | null,
       latitude: Number(row.latitude),
       longitude: Number(row.longitude),
-      risk_level: row.risk_level as string,
+      risk_level: riskLevel,
     });
     orgaoMap.set(orgao, fatores);
   }
