@@ -27,11 +27,11 @@ export function HeatmapLayer({ points }: HeatmapLayerProps) {
       blur: 15,
       maxZoom: 17,
       gradient: {
-        0.2: "#ffffb2",
-        0.4: "#fecc5c",
-        0.6: "#fd8d3c",
-        0.8: "#f03b20",
-        1.0: "#bd0026",
+        0.2: "#fee5d9",
+        0.4: "#fcae91",
+        0.6: "#fb6a4a",
+        0.8: "#de2d26",
+        1.0: "#a50f15",
       },
     });
 
