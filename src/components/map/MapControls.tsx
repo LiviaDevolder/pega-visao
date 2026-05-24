@@ -16,7 +16,7 @@ const LAYER_LABELS: Record<keyof LayerVisibility, string> = {
   fatoresUrbanos: "Fatores Urbanos",
   areasFm: "Areas FM",
   cameras: "Cameras",
-  riskZones: "Zonas de Risco",
+  riskZones: "Coincidencias (BINGO)",
 };
 
 const LAYER_COLORS: Record<keyof LayerVisibility, string> = {

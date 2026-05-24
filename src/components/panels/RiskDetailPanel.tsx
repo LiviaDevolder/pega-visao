@@ -47,6 +47,12 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
         ? "orange"
         : "green";
 
+  let layersCount = 0;
+  if (area.ocorrencias_count > 0) layersCount++;
+  if (area.fatores_count > 0) layersCount++;
+  if (area.denuncias_count > 0) layersCount++;
+  const isBingo = layersCount >= 2;
+
   return (
     <Box
       position="absolute"
@@ -63,9 +69,16 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
-          <Badge colorPalette={riskColor} w="fit-content">
-            Risco {area.risk_level.toUpperCase()}
-          </Badge>
+          <Box display="flex" gap={2} flexWrap="wrap">
+            {isBingo && (
+              <Badge colorPalette="red" variant="solid" w="fit-content">
+                BINGO {layersCount}/3
+              </Badge>
+            )}
+            <Badge colorPalette={riskColor} w="fit-content">
+              Risco {area.risk_level.toUpperCase()}
+            </Badge>
+          </Box>
           <Heading size="sm">{area.nome_area_fm}</Heading>
           <Text fontSize="xs" color="gray.500">
             Score: {area.risk_score.toFixed(4)} | Area:{" "}
