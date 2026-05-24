@@ -1,5 +1,6 @@
 import { sql } from "./db";
 import type { AreaAnalysisData } from "./ai/prompts/area-analysis";
+import type { HeatmapCell } from "@/types/analysis";
 
 export async function aggregateAreaData(
   areaFmId: number
@@ -112,4 +113,29 @@ export async function aggregateAreaData(
     }>,
     dominios_presentes: dominios as Array<{ nome: string; sigla: string }>,
   };
+}
+
+export async function getHeatmapDiaHora(
+  areaFmId: number
+): Promise<HeatmapCell[]> {
+  const rows = await sql(
+    `
+    SELECT
+      dia_semana,
+      EXTRACT(HOUR FROM hora)::int as hora,
+      COUNT(*)::int as total
+    FROM ocorrencias o
+    JOIN areas_fm a ON ST_Contains(a.geom, o.geom)
+    WHERE a.id = $1 AND dia_semana IS NOT NULL AND hora IS NOT NULL
+    GROUP BY dia_semana, EXTRACT(HOUR FROM hora)
+    ORDER BY dia_semana, hora
+  `,
+    [areaFmId]
+  );
+
+  return rows.map((r: Record<string, unknown>) => ({
+    dia_semana: r.dia_semana as string,
+    hora: Number(r.hora),
+    total: Number(r.total),
+  }));
 }
