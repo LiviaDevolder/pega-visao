@@ -23,6 +23,12 @@ function apifyHeaders(): HeadersInit {
   };
 }
 
+function yesterday(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0]; // "YYYY-MM-DD"
+}
+
 async function startRun(query: string): Promise<string> {
   const res = await fetch(`${APIFY_BASE}/acts/${ACTOR_ID}/runs`, {
     method: 'POST',
@@ -30,7 +36,9 @@ async function startRun(query: string): Promise<string> {
     body: JSON.stringify({
       searchTerms: [query],
       maxItems: 50,
-      lang: 'pt',
+      tweetLanguage: 'pt',
+      sort: 'Latest',
+      start: yesterday(),
     }),
   });
 
@@ -84,12 +92,12 @@ async function fetchDatasetItems(datasetId: string, query: string): Promise<RawT
   const items = await res.json();
 
   return (items as Array<Record<string, unknown>>)
-    .filter((item) => item.lang === 'pt' || item.lang === undefined)
+    .filter((item) => !item.lang || item.lang === 'pt')
     .map((item) => ({
       tweet_id: String(item.id ?? item.tweetId ?? item.tweet_id ?? ''),
-      texto: String(item.fullText ?? item.text ?? ''),
+      texto: String(item.text ?? ''),
       autor: String((item.author as Record<string, unknown>)?.userName ?? (item.user as Record<string, unknown>)?.screen_name ?? ''),
-      data_tweet: String(item.createdAt ?? item.created_at ?? new Date().toISOString()),
+      data_tweet: item.createdAt ? new Date(String(item.createdAt)).toISOString() : new Date().toISOString(),
       url: String(item.url ?? `https://twitter.com/i/web/status/${item.id}`),
       query_origem: query,
     }))
