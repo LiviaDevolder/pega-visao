@@ -22,10 +22,17 @@ export function HeatmapLayer({ points }: HeatmapLayerProps) {
       p.weight,
     ]);
 
+    // p95 dos weights: top 5% satura no vermelho escuro, restante se
+    // distribui na escala. Sem isso o COUNT(*) bruto satura tudo.
+    const sortedWeights = points.map((p) => p.weight).sort((a, b) => a - b);
+    const p95 = sortedWeights[Math.floor(sortedWeights.length * 0.95)] || 1;
+
     const heat = (L as unknown as { heatLayer: typeof import("leaflet.heat").heatLayer }).heatLayer(heatData, {
-      radius: 20,
-      blur: 15,
+      radius: 15,
+      blur: 12,
+      max: p95,
       maxZoom: 17,
+      minOpacity: 0.25,
       gradient: {
         0.2: "#fee5d9",
         0.4: "#fcae91",
