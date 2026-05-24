@@ -57,6 +57,7 @@ export function MapView() {
     riskZones: false,
   });
   const [loading, setLoading] = useState(true);
+  const [riskLoading, setRiskLoading] = useState(false);
 
   const fetchHeatmap = useCallback(async (f: MapFilters) => {
     const params = new URLSearchParams();
@@ -74,6 +75,7 @@ export function MapView() {
   }, []);
 
   const fetchRiskData = useCallback(async (r: number) => {
+    setRiskLoading(true);
     try {
       const res = await fetch(`/api/geo/risk-scoring?radius=${r}`);
       const data = await res.json();
@@ -81,6 +83,8 @@ export function MapView() {
       setHotspots(data.hotspots);
     } catch (error) {
       console.error("Erro ao carregar dados de risco:", error);
+    } finally {
+      setRiskLoading(false);
     }
   }, []);
 
@@ -103,7 +107,6 @@ export function MapView() {
         setFatores(fatoresData);
         setAreas(areasData);
         setCameras(camerasData);
-        await Promise.all([fetchHeatmap({}), fetchRiskData(200)]);
       } catch (error) {
         console.error("Erro ao carregar dados do mapa:", error);
       } finally {
@@ -112,15 +115,16 @@ export function MapView() {
     }
 
     loadData();
-  }, [fetchHeatmap, fetchRiskData]);
+  }, []);
 
   useEffect(() => {
     fetchHeatmap(filters);
   }, [filters, fetchHeatmap]);
 
   useEffect(() => {
+    if (!layers.riskZones) return;
     fetchRiskData(radius);
-  }, [radius, fetchRiskData]);
+  }, [layers.riskZones, radius, fetchRiskData]);
 
   const handleLayerToggle = (layer: keyof LayerVisibility) => {
     setLayers((prev) => ({ ...prev, [layer]: !prev[layer] }));
@@ -177,7 +181,7 @@ export function MapView() {
       <MapControls
         layers={layers}
         onToggle={handleLayerToggle}
-        loading={loading}
+        loading={loading || riskLoading}
         onOpenFmSuggestion={() => setShowFmSuggestion(true)}
       />
 

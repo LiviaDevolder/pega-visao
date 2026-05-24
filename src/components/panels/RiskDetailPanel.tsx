@@ -51,7 +51,9 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
   if (area.ocorrencias_count > 0) layersCount++;
   if (area.fatores_count > 0) layersCount++;
   if (area.denuncias_count > 0) layersCount++;
-  const isBingo = layersCount >= 2;
+  const isBingo = layersCount >= 1;
+  const bingoColor =
+    layersCount >= 3 ? "red" : layersCount === 2 ? "orange" : "yellow";
 
   return (
     <Box
@@ -71,7 +73,7 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
         <Stack gap={1}>
           <Box display="flex" gap={2} flexWrap="wrap">
             {isBingo && (
-              <Badge colorPalette="red" variant="solid" w="fit-content">
+              <Badge colorPalette={bingoColor} variant="solid" w="fit-content">
                 BINGO {layersCount}/3
               </Badge>
             )}
