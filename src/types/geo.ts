@@ -44,4 +44,5 @@ export interface LayerVisibility {
   fatoresUrbanos: boolean;
   areasFm: boolean;
   cameras: boolean;
+  riskZones: boolean;
 }

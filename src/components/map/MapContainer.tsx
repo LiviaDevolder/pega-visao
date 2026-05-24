@@ -12,13 +12,18 @@ import type {
   MapFilters,
   LayerVisibility,
 } from "@/types/geo";
+import type { RiskScore, RiskHotspot } from "@/lib/risk-queries";
 import { HeatmapLayer } from "./layers/HeatmapLayer";
 import { FatoresUrbanosLayer } from "./layers/FatoresUrbanosLayer";
 import { AreasFmLayer } from "./layers/AreasFmLayer";
 import { CamerasLayer } from "./layers/CamerasLayer";
+import { RiskZonesLayer } from "./layers/RiskZonesLayer";
 import { MapControls } from "./MapControls";
 import { MapFiltersPanel } from "./MapFilters";
+import { RiskRadiusControl } from "./RiskRadiusControl";
 import { AreaFmDetail } from "../panels/AreaFmDetail";
+import { RiskTop10Panel } from "../panels/RiskTop10Panel";
+import { RiskDetailPanel } from "../panels/RiskDetailPanel";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
 const DEFAULT_ZOOM = 12;
@@ -28,13 +33,18 @@ export function MapView() {
   const [fatores, setFatores] = useState<FatorUrbano[]>([]);
   const [areas, setAreas] = useState<AreaFm[]>([]);
   const [cameras, setCameras] = useState<Camera[]>([]);
+  const [riskScores, setRiskScores] = useState<RiskScore[]>([]);
+  const [hotspots, setHotspots] = useState<RiskHotspot[]>([]);
   const [selectedArea, setSelectedArea] = useState<AreaFm | null>(null);
+  const [selectedRiskArea, setSelectedRiskArea] = useState<RiskScore | null>(null);
+  const [radius, setRadius] = useState(200);
   const [filters, setFilters] = useState<MapFilters>({});
   const [layers, setLayers] = useState<LayerVisibility>({
     heatmap: true,
     fatoresUrbanos: false,
     areasFm: true,
     cameras: false,
+    riskZones: false,
   });
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +61,17 @@ export function MapView() {
     const res = await fetch(`/api/geo/ocorrencias?${params}`);
     const data = await res.json();
     setHeatPoints(data);
+  }, []);
+
+  const fetchRiskData = useCallback(async (r: number) => {
+    try {
+      const res = await fetch(`/api/geo/risk-scoring?radius=${r}`);
+      const data = await res.json();
+      setRiskScores(data.scoring);
+      setHotspots(data.hotspots);
+    } catch (error) {
+      console.error("Erro ao carregar dados de risco:", error);
+    }
   }, []);
 
   useEffect(() => {
@@ -72,7 +93,7 @@ export function MapView() {
         setFatores(fatoresData);
         setAreas(areasData);
         setCameras(camerasData);
-        await fetchHeatmap({});
+        await Promise.all([fetchHeatmap({}), fetchRiskData(200)]);
       } catch (error) {
         console.error("Erro ao carregar dados do mapa:", error);
       } finally {
@@ -81,11 +102,15 @@ export function MapView() {
     }
 
     loadData();
-  }, [fetchHeatmap]);
+  }, [fetchHeatmap, fetchRiskData]);
 
   useEffect(() => {
     fetchHeatmap(filters);
   }, [filters, fetchHeatmap]);
+
+  useEffect(() => {
+    fetchRiskData(radius);
+  }, [radius, fetchRiskData]);
 
   const handleLayerToggle = (layer: keyof LayerVisibility) => {
     setLayers((prev) => ({ ...prev, [layer]: !prev[layer] }));
@@ -97,6 +122,17 @@ export function MapView() {
 
   const handleAreaClick = (area: AreaFm) => {
     setSelectedArea(area);
+    setSelectedRiskArea(null);
+  };
+
+  const handleRiskAreaClick = (area: RiskScore) => {
+    setSelectedRiskArea(area);
+    setSelectedArea(null);
+  };
+
+  const handleHotspotClick = (hotspot: RiskHotspot) => {
+    // Could center map on hotspot location
+    console.log("Hotspot clicked:", hotspot);
   };
 
   return (
@@ -114,8 +150,11 @@ export function MapView() {
 
         {layers.heatmap && <HeatmapLayer points={heatPoints} />}
         {layers.fatoresUrbanos && <FatoresUrbanosLayer fatores={fatores} />}
-        {layers.areasFm && (
+        {layers.areasFm && !layers.riskZones && (
           <AreasFmLayer areas={areas} onAreaClick={handleAreaClick} />
+        )}
+        {layers.riskZones && (
+          <RiskZonesLayer areas={riskScores} onAreaClick={handleRiskAreaClick} />
         )}
         {layers.cameras && <CamerasLayer cameras={cameras} />}
       </LeafletMap>
@@ -128,10 +167,41 @@ export function MapView() {
 
       <MapFiltersPanel filters={filters} onFilterChange={handleFilterChange} />
 
+      {layers.riskZones && (
+        <Box
+          position="absolute"
+          bottom={4}
+          left={4}
+          zIndex={1000}
+          bg="white"
+          borderRadius="lg"
+          p={4}
+          shadow="lg"
+          maxW="320px"
+          maxH="60vh"
+          overflowY="auto"
+        >
+          <RiskRadiusControl radius={radius} onRadiusChange={setRadius} />
+          <Box mt={4}>
+            <RiskTop10Panel
+              hotspots={hotspots}
+              onHotspotClick={handleHotspotClick}
+            />
+          </Box>
+        </Box>
+      )}
+
       {selectedArea && (
         <AreaFmDetail
           area={selectedArea}
           onClose={() => setSelectedArea(null)}
+        />
+      )}
+
+      {selectedRiskArea && (
+        <RiskDetailPanel
+          area={selectedRiskArea}
+          onClose={() => setSelectedRiskArea(null)}
         />
       )}
     </Box>

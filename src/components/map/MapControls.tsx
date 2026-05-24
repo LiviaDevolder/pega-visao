@@ -15,6 +15,7 @@ const LAYER_LABELS: Record<keyof LayerVisibility, string> = {
   fatoresUrbanos: "Fatores Urbanos",
   areasFm: "Areas FM",
   cameras: "Cameras",
+  riskZones: "Zonas de Risco",
 };
 
 const LAYER_COLORS: Record<keyof LayerVisibility, string> = {
@@ -22,6 +23,7 @@ const LAYER_COLORS: Record<keyof LayerVisibility, string> = {
   fatoresUrbanos: "green",
   areasFm: "blue",
   cameras: "cyan",
+  riskZones: "orange",
 };
 
 export function MapControls({ layers, onToggle, loading }: MapControlsProps) {
