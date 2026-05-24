@@ -37,10 +37,11 @@ export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
       {areas.map((area) => {
         const color = getRiskColor(area.risk_level);
         const layers = countLayers(area);
-        const isBingo = layers >= 2;
+        const isBingo = layers >= 1;
+        const isFullBingo = layers >= 2;
         const style: PathOptions = {
           color,
-          weight: isBingo ? 3 : 2,
+          weight: isFullBingo ? 3 : 2,
           fillColor: color,
           fillOpacity: 0.3,
         };
@@ -71,7 +72,9 @@ export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
               <br />
               {isBingo && (
                 <>
-                  <strong style={{ color: "#dc2626" }}>
+                  <strong
+                    style={{ color: isFullBingo ? "#dc2626" : "#d97706" }}
+                  >
                     BINGO! {layers}/3 camadas coincidindo
                   </strong>
                   <br />
