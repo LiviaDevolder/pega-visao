@@ -181,9 +181,23 @@ Os dados utilizados são fornecidos pelo CompStat Municipal e estão em `base_da
 
 > **Nota:** os dados reais são sensíveis e não são versionados. O repositório inclui apenas amostras anonimizadas para desenvolvimento.
 
-## Créditos
+## 👥 Time | Nome | Cargo | LinkedIn | 
 
-Desenvolvido durante o **Claude Impact Lab Rio 2026** sobre o briefing do CompStat Municipal — Prefeitura do Rio de Janeiro.
+ 
+Laíssa Saraiva | Desenvolvedora @ WPP Commerce | [linkedin.com/in/laissasc](https://www.linkedin.com/in/laissasc/)   
+
+Livia Devolder | Full Stack Engineer @ Cayena | [linkedin.com/in/liviadevolder](https://www.linkedin.com/in/liviadevolder/)  
+
+Paulo Rosa | CTO Tech @ Dealboard | [linkedin.com/in/paulorosatech](https://www.linkedin.com/in/paulorosatech) 
+
+Roberta Amaro | Software Engineer @ Grupo OLX | [linkedin.com/in/roberta-amaro](https://www.linkedin.com/in/roberta-amaro/) 
+
+
+
+## Créditos 
+
+Desenvolvido durante o **Claude Impact Lab Rio 2026**
+
 
 ## Licença
 
