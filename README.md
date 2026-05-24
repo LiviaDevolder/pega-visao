@@ -87,8 +87,11 @@ Distribuição otimizada dos 600 agentes pelas 22 áreas, com modelo de emprego 
 ### 🏗️ Plano de Ação por Órgão
 Fatores urbanos agrupados por responsável (Comlurb, RioLuz, SEOP, CET-Rio, SMAS…) e priorizados por risco, prontos para encaminhamento intersetorial.
 
-### 📡 Inteligência de Redes Sociais
-Monitoramento de publicações sobre crimes nas 22 áreas, classificados automaticamente por IA quanto a tipo, localização e relevância.
+<img src="./public/fatores_urbanos.png" alt="Pega Visão" width="600" />
+
+### 📡 Inteligência de Redes Sociais (Twitter)
+Scraping automatizado do Twitter via [Apify](https://apify.com/) para capturar relatos de crimes e menções à Guarda/Força Municipal nas 22 áreas FM, com classificação por IA — dando ao analista inteligência **em tempo quase real** sobre incidentes reportados pela população.
+
 
 ## Arquitetura
 
