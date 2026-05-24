@@ -1,22 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Box, Stack, Text, Input } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Stack, Text, Input, HStack, IconButton } from "@chakra-ui/react";
 import { NativeSelect } from "@chakra-ui/react";
-import type { MapFilters } from "@/types/geo";
+
+export interface LocalMapFilters {
+  dia_semana?: string;
+  hora_inicio?: number;
+  hora_fim?: number;
+}
 
 interface MapFiltersPanelProps {
-  filters: MapFilters;
-  onFilterChange: (filters: MapFilters) => void;
+  filters: LocalMapFilters;
+  onFilterChange: (filters: LocalMapFilters) => void;
 }
 
 const DIAS_SEMANA = [
   "Segunda",
-  "Terca",
+  "Terça",
   "Quarta",
   "Quinta",
   "Sexta",
-  "Sabado",
+  "Sábado",
   "Domingo",
 ];
 
@@ -24,18 +29,7 @@ export function MapFiltersPanel({
   filters,
   onFilterChange,
 }: MapFiltersPanelProps) {
-  const [delitos, setDelitos] = useState<string[]>([]);
-  const [anos, setAnos] = useState<number[]>([]);
-
-  useEffect(() => {
-    fetch("/api/geo/ocorrencias/filtros")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.delitos) setDelitos(data.delitos);
-        if (data.anos) setAnos(data.anos);
-      })
-      .catch(() => {});
-  }, []);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Box
@@ -45,156 +39,93 @@ export function MapFiltersPanel({
       zIndex={1000}
       bg="white"
       borderRadius="lg"
-      p={4}
+      p={collapsed ? 2 : 4}
       shadow="lg"
-      minW="220px"
-      maxH="90vh"
+      minW={collapsed ? "auto" : "220px"}
+      maxH="80vh"
       overflowY="auto"
     >
-      <Stack gap={3}>
+      <HStack justify="space-between" mb={collapsed ? 0 : 3}>
         <Text fontWeight="bold" fontSize="sm" color="gray.700">
-          Filtros
+          {collapsed ? "⏱" : "Filtros Temporais"}
         </Text>
+        <IconButton
+          aria-label={collapsed ? "Expandir" : "Recolher"}
+          size="2xs"
+          variant="ghost"
+          onClick={() => setCollapsed((v) => !v)}
+        >
+          {collapsed ? "›" : "‹"}
+        </IconButton>
+      </HStack>
 
-        <Box>
-          <Text fontSize="xs" color="gray.500" mb={1}>
-            Ano
-          </Text>
-          <NativeSelect.Root size="sm">
-            <NativeSelect.Field
-              value={filters.ano || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  ano: e.target.value ? Number(e.target.value) : undefined,
-                })
-              }
-            >
-              <option value="">Todos</option>
-              {anos.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" color="gray.500" mb={1}>
-            Mes
-          </Text>
-          <NativeSelect.Root size="sm">
-            <NativeSelect.Field
-              value={filters.mes || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  mes: e.target.value ? Number(e.target.value) : undefined,
-                })
-              }
-            >
-              <option value="">Todos</option>
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {new Date(2024, i).toLocaleString("pt-BR", { month: "long" })}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" color="gray.500" mb={1}>
-            Tipo de Delito
-          </Text>
-          <NativeSelect.Root size="sm">
-            <NativeSelect.Field
-              value={filters.delito || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  delito: e.target.value || undefined,
-                })
-              }
-            >
-              <option value="">Todos</option>
-              {delitos.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" color="gray.500" mb={1}>
-            Dia da Semana
-          </Text>
-          <NativeSelect.Root size="sm">
-            <NativeSelect.Field
-              value={filters.dia_semana || ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  dia_semana: e.target.value || undefined,
-                })
-              }
-            >
-              <option value="">Todos</option>
-              {DIAS_SEMANA.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Box>
-
-        <Box>
-          <Text fontSize="xs" color="gray.500" mb={1}>
-            Faixa Horaria
-          </Text>
-          <Box display="flex" gap={2} alignItems="center">
-            <Input
-              size="sm"
-              type="number"
-              min={0}
-              max={23}
-              placeholder="De"
-              value={filters.hora_inicio ?? ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  hora_inicio: e.target.value
-                    ? Number(e.target.value)
-                    : undefined,
-                })
-              }
-            />
-            <Text fontSize="xs">-</Text>
-            <Input
-              size="sm"
-              type="number"
-              min={0}
-              max={23}
-              placeholder="Ate"
-              value={filters.hora_fim ?? ""}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filters,
-                  hora_fim: e.target.value ? Number(e.target.value) : undefined,
-                })
-              }
-            />
+      {!collapsed && (
+        <Stack gap={3}>
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>
+              Dia da Semana
+            </Text>
+            <NativeSelect.Root size="sm">
+              <NativeSelect.Field
+                value={filters.dia_semana || ""}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    dia_semana: e.target.value || undefined,
+                  })
+                }
+              >
+                <option value="">Todos</option>
+                {DIAS_SEMANA.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </NativeSelect.Field>
+              <NativeSelect.Indicator />
+            </NativeSelect.Root>
           </Box>
-        </Box>
-      </Stack>
+
+          <Box>
+            <Text fontSize="xs" color="gray.500" mb={1}>
+              Faixa Horária
+            </Text>
+            <Box display="flex" gap={2} alignItems="center">
+              <Input
+                size="sm"
+                type="number"
+                min={0}
+                max={23}
+                placeholder="De"
+                value={filters.hora_inicio ?? ""}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    hora_inicio: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  })
+                }
+              />
+              <Text fontSize="xs">-</Text>
+              <Input
+                size="sm"
+                type="number"
+                min={0}
+                max={23}
+                placeholder="Até"
+                value={filters.hora_fim ?? ""}
+                onChange={(e) =>
+                  onFilterChange({
+                    ...filters,
+                    hora_fim: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+              />
+            </Box>
+          </Box>
+        </Stack>
+      )}
     </Box>
   );
 }
