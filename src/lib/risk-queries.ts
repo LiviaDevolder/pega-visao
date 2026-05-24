@@ -24,16 +24,39 @@ export interface RiskHotspot {
 
 export async function getRiskScoring(): Promise<RiskScore[]> {
   const rows = await sql(`
-    WITH area_stats AS (
+    WITH ocorrencias_por_area AS (
+      SELECT a.id, COUNT(o.*)::int as total
+      FROM areas_fm a
+      LEFT JOIN ocorrencias o ON ST_Contains(a.geom, o.geom)
+      GROUP BY a.id
+    ),
+    fatores_por_area AS (
+      SELECT a.id, COUNT(f.*)::int as total
+      FROM areas_fm a
+      LEFT JOIN fatores_urbanos f
+        ON f.geom IS NOT NULL AND ST_Contains(a.geom, f.geom)
+      GROUP BY a.id
+    ),
+    denuncias_por_area AS (
+      SELECT a.id, COUNT(d.*)::int as total
+      FROM areas_fm a
+      LEFT JOIN denuncias d
+        ON d.geom IS NOT NULL AND ST_Contains(a.geom, d.geom)
+      GROUP BY a.id
+    ),
+    area_stats AS (
       SELECT
         a.id,
         a.nome_area_fm,
         ST_AsGeoJSON(a.geom) as geojson,
         ST_Area(a.geom::geography) / 1000000.0 as area_km2,
-        (SELECT COUNT(*) FROM ocorrencias o WHERE ST_Contains(a.geom, o.geom)) as ocorrencias_count,
-        (SELECT COUNT(*) FROM fatores_urbanos f WHERE f.geom IS NOT NULL AND ST_Contains(a.geom, f.geom)) as fatores_count,
-        (SELECT COUNT(*) FROM denuncias d WHERE d.geom IS NOT NULL AND ST_Contains(a.geom, d.geom)) as denuncias_count
+        COALESCE(oa.total, 0) as ocorrencias_count,
+        COALESCE(fa.total, 0) as fatores_count,
+        COALESCE(da.total, 0) as denuncias_count
       FROM areas_fm a
+      LEFT JOIN ocorrencias_por_area oa ON oa.id = a.id
+      LEFT JOIN fatores_por_area fa ON fa.id = a.id
+      LEFT JOIN denuncias_por_area da ON da.id = a.id
     ),
     scored AS (
       SELECT
@@ -81,16 +104,17 @@ export async function getRiskScoring(): Promise<RiskScore[]> {
   }));
 }
 
-export async function getRiskHotspots(radiusMeters: number): Promise<RiskHotspot[]> {
-  const rows = await sql(`
+export async function getRiskHotspots(
+  radiusMeters: number
+): Promise<RiskHotspot[]> {
+  const rows = await sql(
+    `
     WITH hotspot_candidates AS (
-      SELECT
-        o.latitude,
-        o.longitude,
-        o.locf as logradouro,
-        o.geom
-      FROM ocorrencias o
-      WHERE o.geom IS NOT NULL
+      SELECT DISTINCT ON (ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3))
+        latitude, longitude, locf as logradouro, geom
+      FROM ocorrencias
+      WHERE geom IS NOT NULL
+      ORDER BY ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3), id
     ),
     scored_points AS (
       SELECT
@@ -103,13 +127,7 @@ export async function getRiskHotspots(radiusMeters: number): Promise<RiskHotspot
          WHERE f.geom IS NOT NULL AND ST_DWithin(hc.geom::geography, f.geom::geography, $1)) as fatores_no_raio,
         (SELECT COUNT(*) FROM denuncias d
          WHERE d.geom IS NOT NULL AND ST_DWithin(hc.geom::geography, d.geom::geography, $1)) as denuncias_no_raio
-      FROM (
-        SELECT DISTINCT ON (ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3))
-          latitude, longitude, locf as logradouro, geom
-        FROM ocorrencias
-        WHERE geom IS NOT NULL
-        ORDER BY ROUND(latitude::numeric, 3), ROUND(longitude::numeric, 3), id
-      ) hc
+      FROM hotspot_candidates hc
     )
     SELECT
       latitude, longitude, logradouro,
@@ -118,10 +136,12 @@ export async function getRiskHotspots(radiusMeters: number): Promise<RiskHotspot
       denuncias_no_raio::int,
       (ocorrencias_no_raio * (1 + fatores_no_raio) * (1 + denuncias_no_raio))::float as score
     FROM scored_points
-    WHERE fatores_no_raio > 0 AND denuncias_no_raio > 0
+    WHERE fatores_no_raio > 0 OR denuncias_no_raio > 0
     ORDER BY score DESC
     LIMIT 10
-  `, [radiusMeters]);
+  `,
+    [radiusMeters]
+  );
 
   return rows.map((r: Record<string, unknown>) => ({
     latitude: Number(r.latitude),
@@ -136,7 +156,8 @@ export async function getRiskHotspots(radiusMeters: number): Promise<RiskHotspot
 
 export async function getRiskDetail(areaFmId: number) {
   const [ocorrencias, fatores, denuncias] = await Promise.all([
-    sql(`
+    sql(
+      `
       SELECT desc_delito, COUNT(*)::int as total
       FROM ocorrencias o
       JOIN areas_fm a ON ST_Contains(a.geom, o.geom)
@@ -144,16 +165,22 @@ export async function getRiskDetail(areaFmId: number) {
       GROUP BY desc_delito
       ORDER BY total DESC
       LIMIT 10
-    `, [areaFmId]),
-    sql(`
+    `,
+      [areaFmId]
+    ),
+    sql(
+      `
       SELECT orgao_responsavel, tipo_ocorrencia_descricao, COUNT(*)::int as total
       FROM fatores_urbanos f
       JOIN areas_fm a ON ST_Contains(a.geom, f.geom)
       WHERE a.id = $1 AND f.geom IS NOT NULL
       GROUP BY orgao_responsavel, tipo_ocorrencia_descricao
       ORDER BY total DESC
-    `, [areaFmId]),
-    sql(`
+    `,
+      [areaFmId]
+    ),
+    sql(
+      `
       SELECT assuntos_classe, COUNT(*)::int as total
       FROM denuncias d
       JOIN areas_fm a ON ST_Contains(a.geom, d.geom)
@@ -161,7 +188,9 @@ export async function getRiskDetail(areaFmId: number) {
       GROUP BY assuntos_classe
       ORDER BY total DESC
       LIMIT 10
-    `, [areaFmId]),
+    `,
+      [areaFmId]
+    ),
   ]);
 
   return { ocorrencias, fatores, denuncias };
