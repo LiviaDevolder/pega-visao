@@ -27,21 +27,21 @@ export async function getRiskScoring(): Promise<RiskScore[]> {
     WITH ocorrencias_por_area AS (
       SELECT a.id, COUNT(o.*)::int as total
       FROM areas_fm a
-      LEFT JOIN ocorrencias o ON ST_Contains(a.geom, o.geom)
+      LEFT JOIN ocorrencias o ON ST_Intersects(a.geom, o.geom)
       GROUP BY a.id
     ),
     fatores_por_area AS (
       SELECT a.id, COUNT(f.*)::int as total
       FROM areas_fm a
       LEFT JOIN fatores_urbanos f
-        ON f.geom IS NOT NULL AND ST_Contains(a.geom, f.geom)
+        ON f.geom IS NOT NULL AND ST_Intersects(a.geom, f.geom)
       GROUP BY a.id
     ),
     denuncias_por_area AS (
       SELECT a.id, COUNT(d.*)::int as total
       FROM areas_fm a
       LEFT JOIN denuncias d
-        ON d.geom IS NOT NULL AND ST_Contains(a.geom, d.geom)
+        ON d.geom IS NOT NULL AND ST_Intersects(a.geom, d.geom)
       GROUP BY a.id
     ),
     area_stats AS (
