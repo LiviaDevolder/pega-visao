@@ -2,14 +2,20 @@
   <img src="./public/logo.svg" alt="Pega Visão" width="320" />
 </p>
 
+
+<p align="center"><strong>Plataforma de Inteligência Criminal do CompStat Rio</strong></p>
+
 <p align="center">
   🔗 <a href="https://www.pegavisao.xyz/"><strong>Pega Visão</strong></a>
 </p>
-<p align="center"><strong>Plataforma de Inteligência Criminal do CompStat Rio</strong></p>
+
+<p align="center">Tema: Segurança
  
 > De **horas** para **minutos**: cruzamento geoespacial automatizado e relatórios analíticos gerados por IA para as reuniões semanais do CompStat Municipal do Rio de Janeiro.
  
 ---
+
+
 
 ## Sumário
 
@@ -67,6 +73,8 @@ Mancha criminal, fatores urbanos, câmeras e os 22 polígonos da FM em camadas c
 ### ⚠️ Coincidências de Alto Risco
 Identificação automática de pontos onde crime + fator urbano + denúncia se sobrepõem no mesmo raio, com scoring de criticidade para priorização.
 
+<img src="./public/coincidencias.png" alt="Pega Visão" width="600" />
+
 ### 🤖 Análise de Área por IA
 Síntese executiva, série temporal, dinâmica criminal e diagnóstico de fatores urbanos — tudo gerado por IA e pronto para a reunião semanal.
 
@@ -87,10 +95,13 @@ Distribuição otimizada dos 600 agentes pelas 22 áreas, com modelo de emprego 
 ### 🏗️ Plano de Ação por Órgão
 Fatores urbanos agrupados por responsável (Comlurb, RioLuz, SEOP, CET-Rio, SMAS…) e priorizados por risco, prontos para encaminhamento intersetorial.
 
-<img src="./public/fatores_urbanos.png" alt="Pega Visão" width="600" />
+
 
 ### 📡 Inteligência de Redes Sociais (Twitter)
 Scraping automatizado do Twitter via [Apify](https://apify.com/) para capturar relatos de crimes e menções à Guarda/Força Municipal nas 22 áreas FM, com classificação por IA — dando ao analista inteligência **em tempo quase real** sobre incidentes reportados pela população.
+
+
+## Coincidencias
 
 
 ## Arquitetura
