@@ -1,34 +1,40 @@
 "use client";
 
-import { Box, Stack, Text, Spinner, Button } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Stack, Text, Spinner, HStack, IconButton } from "@chakra-ui/react";
 import { Switch } from "@chakra-ui/react";
-import type { LayerVisibility } from "@/types/geo";
+
+export type MapLayerKey =
+  | "heatmap"
+  | "fatoresUrbanos"
+  | "areasFm"
+  | "cameras";
+
+export type MapLayerVisibility = Record<MapLayerKey, boolean>;
 
 interface MapControlsProps {
-  layers: LayerVisibility;
-  onToggle: (layer: keyof LayerVisibility) => void;
+  layers: MapLayerVisibility;
+  onToggle: (layer: MapLayerKey) => void;
   loading: boolean;
-  onOpenFmSuggestion?: () => void;
-  onOpenSocialFeed?: () => void;
 }
 
-const LAYER_LABELS: Record<keyof LayerVisibility, string> = {
+const LAYER_LABELS: Record<MapLayerKey, string> = {
   heatmap: "Mancha Criminal",
   fatoresUrbanos: "Fatores Urbanos",
-  areasFm: "Areas FM",
-  cameras: "Cameras",
-  riskZones: "Coincidencias (BINGO)",
+  areasFm: "Áreas FM",
+  cameras: "Câmeras",
 };
 
-const LAYER_COLORS: Record<keyof LayerVisibility, string> = {
+const LAYER_COLORS: Record<MapLayerKey, string> = {
   heatmap: "red",
   fatoresUrbanos: "green",
   areasFm: "blue",
   cameras: "cyan",
-  riskZones: "orange",
 };
 
-export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion, onOpenSocialFeed }: MapControlsProps) {
+export function MapControls({ layers, onToggle, loading }: MapControlsProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <Box
       position="absolute"
@@ -37,39 +43,28 @@ export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion, onO
       zIndex={1000}
       bg="white"
       borderRadius="lg"
-      p={4}
+      p={collapsed ? 2 : 4}
       shadow="lg"
-      minW="200px"
+      minW={collapsed ? "auto" : "200px"}
     >
-      <Stack gap={3}>
+      <HStack justify="space-between" mb={collapsed ? 0 : 3}>
         <Text fontWeight="bold" fontSize="sm" color="gray.700">
-          Camadas {loading && <Spinner size="xs" ml={2} />}
+          {collapsed ? "☰" : "Camadas"}{" "}
+          {loading && !collapsed && <Spinner size="xs" ml={2} />}
         </Text>
+        <IconButton
+          aria-label={collapsed ? "Expandir" : "Recolher"}
+          size="2xs"
+          variant="ghost"
+          onClick={() => setCollapsed((v) => !v)}
+        >
+          {collapsed ? "‹" : "›"}
+        </IconButton>
+      </HStack>
 
-        {onOpenFmSuggestion && (
-          <Button
-            size="xs"
-            colorPalette="blue"
-            variant="outline"
-            onClick={onOpenFmSuggestion}
-          >
-            Sugestao FM
-          </Button>
-        )}
-
-        {onOpenSocialFeed && (
-          <Button
-            size="xs"
-            colorPalette="purple"
-            variant="outline"
-            onClick={onOpenSocialFeed}
-          >
-            Feed Social
-          </Button>
-        )}
-
-        {(Object.keys(LAYER_LABELS) as Array<keyof LayerVisibility>).map(
-          (layer) => (
+      {!collapsed && (
+        <Stack gap={3}>
+          {(Object.keys(LAYER_LABELS) as MapLayerKey[]).map((layer) => (
             <Box
               key={layer}
               display="flex"
@@ -91,9 +86,9 @@ export function MapControls({ layers, onToggle, loading, onOpenFmSuggestion, onO
                 </Switch.Control>
               </Switch.Root>
             </Box>
-          )
-        )}
-      </Stack>
+          ))}
+        </Stack>
+      )}
     </Box>
   );
 }
