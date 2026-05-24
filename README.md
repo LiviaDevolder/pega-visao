@@ -100,6 +100,7 @@ Fatores urbanos agrupados por responsável (Comlurb, RioLuz, SEOP, CET-Rio, SMAS
 ### 📡 Inteligência de Redes Sociais (Twitter)
 Scraping automatizado do Twitter via [Apify](https://apify.com/) para capturar relatos de crimes e menções à Guarda/Força Municipal nas 22 áreas FM, com classificação por IA — dando ao analista inteligência **em tempo quase real** sobre incidentes reportados pela população.
 
+<img src="./public/redes_sociais.png" alt="Pega Visão" width="600" />
 
 ## Coincidencias
 
