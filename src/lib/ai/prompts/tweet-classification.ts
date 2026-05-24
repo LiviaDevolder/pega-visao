@@ -25,7 +25,7 @@ Analise se o tweet relata ou menciona uma ocorrencia criminal no municipio do Ri
 
 {
   "area_fm": "nome da area FM mais provavelmente mencionada, ou null se nao identificada",
-  "tipo_crime": "um de: 'roubo', 'furto', 'tiroteio', 'outros', null se nao relevante",
+  "tipo_crime": "um de: 'roubo', 'furto', 'arrastao', 'tiroteio', 'outros', null se nao relevante",
   "local_especifico": "logradouro, bairro ou referencia geografica especifica mencionada, ou null",
   "horario_relatado": "horario ou periodo do dia mencionado no tweet (ex: '22h', 'madrugada'), ou null",
   "relevancia": numero de 1 a 5 (1=irrelevante, 5=altamente relevante para seguranca publica),
@@ -33,7 +33,7 @@ Analise se o tweet relata ou menciona uma ocorrencia criminal no municipio do Ri
   "is_relevant": true se o tweet relata um crime ou situacao de seguranca publica real, false caso contrario
 }
 
-Areas FM validas: Copacabana, Botafogo, Ipanema, Centro, Tijuca, Madureira, Penha, Meier, Jacarepagua, Bangu, Santa Cruz, Ilha do Governador, Sao Cristovao, Ramos, Pavuna, Santa Teresa, Bonsucesso, Iraja, Ilha de Paqueta, Deodoro, Guaratiba, Vigario Geral.
+Areas FM validas: Arpoador - Av Atlantica, Av Americas - Av Lucio Costa, Av Atlantica - Av Barata Ribeiro, Av Ayrton Senna, Bangu: Calcadao - Bangu Shopping, Campo Grande: Estacao - Calcadao, Estacao Del Castilho - Norte Shopping, Estacao Maracana - UERJ, Estacao Marechal Hermes, Estacao Meier - Cachambi, Estacoes SFX - Afonso Pena, General Osorio - Nossa Sra da Paz, Jardim de Alah, Madureira - Estacao - Mercadao, Metro Botafogo - Sao Clemente, Posto 1, Praia Botafogo - Marques de Abrantes, Praca Santos Dumont - Parque dos Patins, Pres. Vargas - Campo de Santana, Rio Sul, Rodoviaria - Terminal Gentileza, Santa Cruz: Estacao - Shopping.
 
 Responda APENAS com o JSON, sem markdown ou texto adicional.`;
 }

@@ -19,7 +19,7 @@ interface SocialFeedPanelProps {
   onClose: () => void;
 }
 
-const TIPO_CRIME_OPTIONS = ["roubo", "furto", "tiroteio", "outros"];
+const TIPO_CRIME_OPTIONS = ["roubo", "furto", "arrastao", "tiroteio", "outros"];
 
 function relevanciaColor(r: number | null): string {
   if (!r) return "gray";
