@@ -10,6 +10,11 @@
 </p>
 
 <p align="center">Tema: Segurança
+
+## Video
+
+<a href="https://jam.dev/c/e18b21b8-6e38-475a-ae89-efa45192dbca">Video</a>
+
  
 > De **horas** para **minutos**: cruzamento geoespacial automatizado e relatórios analíticos gerados por IA para as reuniões semanais do CompStat Municipal do Rio de Janeiro.
  
