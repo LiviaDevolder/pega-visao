@@ -23,14 +23,24 @@ function getRiskColor(level: string): string {
   }
 }
 
+function countLayers(area: RiskScore): number {
+  let count = 0;
+  if (area.ocorrencias_count > 0) count++;
+  if (area.fatores_count > 0) count++;
+  if (area.denuncias_count > 0) count++;
+  return count;
+}
+
 export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
   return (
     <>
       {areas.map((area) => {
         const color = getRiskColor(area.risk_level);
+        const layers = countLayers(area);
+        const isBingo = layers >= 2;
         const style: PathOptions = {
           color,
-          weight: 2,
+          weight: isBingo ? 3 : 2,
           fillColor: color,
           fillOpacity: 0.3,
         };
@@ -49,7 +59,7 @@ export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
             eventHandlers={{
               click: () => onAreaClick(area),
               mouseover: (e: LeafletMouseEvent) => {
-                e.target.setStyle({ fillOpacity: 0.5, weight: 3 });
+                e.target.setStyle({ fillOpacity: 0.5, weight: isBingo ? 4 : 3 });
               },
               mouseout: (e: LeafletMouseEvent) => {
                 e.target.setStyle(style);
@@ -59,6 +69,14 @@ export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
             <Popup>
               <strong>{area.nome_area_fm}</strong>
               <br />
+              {isBingo && (
+                <>
+                  <strong style={{ color: "#dc2626" }}>
+                    BINGO! {layers}/3 camadas coincidindo
+                  </strong>
+                  <br />
+                </>
+              )}
               Risco: <strong style={{ color }}>{area.risk_level.toUpperCase()}</strong>
               <br />
               Score: {area.risk_score.toFixed(2)}

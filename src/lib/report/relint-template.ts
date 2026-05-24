@@ -11,6 +11,12 @@ import {
   BorderStyle,
 } from "docx";
 
+export interface PerguntaNorteadoraReport {
+  pergunta: string;
+  diagnostico: string;
+  sugestao: string;
+}
+
 export interface ReportData {
   area_fm: string;
   periodo: string;
@@ -20,6 +26,7 @@ export interface ReportData {
     rows: string[][];
   };
   dinamica_criminal: string;
+  perguntas_norteadoras: PerguntaNorteadoraReport[];
   fatores_urbanos: Array<{
     orgao: string;
     tipo: string;
@@ -32,16 +39,47 @@ export interface ReportData {
   }>;
 }
 
+const ALL_BORDERS = {
+  top: { style: BorderStyle.SINGLE, size: 1 },
+  bottom: { style: BorderStyle.SINGLE, size: 1 },
+  left: { style: BorderStyle.SINGLE, size: 1 },
+  right: { style: BorderStyle.SINGLE, size: 1 },
+  insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
+  insideVertical: { style: BorderStyle.SINGLE, size: 1 },
+};
+
+function headerCell(text: string, widthPct?: number): TableCell {
+  return new TableCell({
+    children: [
+      new Paragraph({
+        children: [new TextRun({ text, bold: true, size: 20 })],
+      }),
+    ],
+    ...(widthPct !== undefined
+      ? { width: { size: widthPct, type: WidthType.PERCENTAGE } }
+      : {}),
+  });
+}
+
+function bodyCell(text: string): TableCell {
+  return new TableCell({
+    children: [
+      new Paragraph({
+        children: [new TextRun({ text, size: 20 })],
+      }),
+    ],
+  });
+}
+
 export function buildRelintDocument(data: ReportData): Document {
   const sections = [];
 
-  // Cabecalho
   sections.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: "RELATORIO DE INTELIGENCIA - RELINT",
+          text: "RELATORIO ANALITICO DE AREA - COMPSTAT",
           bold: true,
           size: 28,
         }),
@@ -50,10 +88,7 @@ export function buildRelintDocument(data: ReportData): Document {
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [
-        new TextRun({
-          text: `Area: ${data.area_fm}`,
-          size: 24,
-        }),
+        new TextRun({ text: `Area FM: ${data.area_fm}`, size: 24 }),
       ],
     }),
     new Paragraph({
@@ -69,7 +104,6 @@ export function buildRelintDocument(data: ReportData): Document {
     new Paragraph({ children: [] })
   );
 
-  // Resumo Executivo
   sections.push(
     new Paragraph({
       heading: HeadingLevel.HEADING_1,
@@ -81,69 +115,10 @@ export function buildRelintDocument(data: ReportData): Document {
     })
   );
 
-  // Analise Temporal
   sections.push(
     new Paragraph({
       heading: HeadingLevel.HEADING_1,
-      children: [new TextRun({ text: "2. ANALISE TEMPORAL", bold: true })],
-    })
-  );
-
-  if (data.analise_temporal.rows.length > 0) {
-    const tableRows = [
-      new TableRow({
-        children: data.analise_temporal.headers.map(
-          (h) =>
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: h, bold: true, size: 20 })],
-                }),
-              ],
-              width: { size: 100 / data.analise_temporal.headers.length, type: WidthType.PERCENTAGE },
-            })
-        ),
-      }),
-      ...data.analise_temporal.rows.map(
-        (row) =>
-          new TableRow({
-            children: row.map(
-              (cell) =>
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [new TextRun({ text: cell, size: 20 })],
-                    }),
-                  ],
-                })
-            ),
-          })
-      ),
-    ];
-
-    sections.push(
-      new Table({
-        rows: tableRows,
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: {
-          top: { style: BorderStyle.SINGLE, size: 1 },
-          bottom: { style: BorderStyle.SINGLE, size: 1 },
-          left: { style: BorderStyle.SINGLE, size: 1 },
-          right: { style: BorderStyle.SINGLE, size: 1 },
-          insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
-          insideVertical: { style: BorderStyle.SINGLE, size: 1 },
-        },
-      })
-    );
-  }
-
-  sections.push(new Paragraph({ children: [] }));
-
-  // Dinamica Criminal
-  sections.push(
-    new Paragraph({
-      heading: HeadingLevel.HEADING_1,
-      children: [new TextRun({ text: "3. DINAMICA CRIMINAL", bold: true })],
+      children: [new TextRun({ text: "2. DINAMICA CRIMINAL", bold: true })],
     }),
     new Paragraph({
       children: [new TextRun({ text: data.dinamica_criminal, size: 22 })],
@@ -151,71 +126,116 @@ export function buildRelintDocument(data: ReportData): Document {
     })
   );
 
-  // Fatores Urbanos
   sections.push(
     new Paragraph({
       heading: HeadingLevel.HEADING_1,
-      children: [new TextRun({ text: "4. FATORES URBANOS", bold: true })],
+      children: [new TextRun({ text: "3. ANALISE TEMPORAL", bold: true })],
     })
   );
+  if (data.analise_temporal.rows.length > 0) {
+    const tableRows = [
+      new TableRow({
+        children: data.analise_temporal.headers.map((h) =>
+          headerCell(h, 100 / data.analise_temporal.headers.length)
+        ),
+      }),
+      ...data.analise_temporal.rows.map(
+        (row) =>
+          new TableRow({
+            children: row.map((cell) => bodyCell(cell)),
+          })
+      ),
+    ];
+    sections.push(
+      new Table({
+        rows: tableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: ALL_BORDERS,
+      })
+    );
+  }
+  sections.push(new Paragraph({ children: [] }));
 
+  sections.push(
+    new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [
+        new TextRun({ text: "4. PERGUNTAS NORTEADORAS", bold: true }),
+      ],
+    })
+  );
+  if (data.perguntas_norteadoras.length > 0) {
+    const perguntasRows = [
+      new TableRow({
+        children: [
+          headerCell("Pergunta", 35),
+          headerCell("Diagnostico", 35),
+          headerCell("Sugestao", 30),
+        ],
+      }),
+      ...data.perguntas_norteadoras.map(
+        (p) =>
+          new TableRow({
+            children: [
+              bodyCell(p.pergunta),
+              bodyCell(p.diagnostico),
+              bodyCell(p.sugestao),
+            ],
+          })
+      ),
+    ];
+    sections.push(
+      new Table({
+        rows: perguntasRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: ALL_BORDERS,
+      })
+    );
+  }
+  sections.push(new Paragraph({ children: [] }));
+
+  sections.push(
+    new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [
+        new TextRun({ text: "5. FATORES DE INCIDENCIA CRIMINAL", bold: true }),
+      ],
+    })
+  );
   if (data.fatores_urbanos.length > 0) {
     const fatoresRows = [
       new TableRow({
-        children: ["Orgao", "Tipo", "Logradouro", "Acao Sugerida"].map(
-          (h) =>
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: h, bold: true, size: 20 })],
-                }),
-              ],
-            })
+        children: ["Orgao", "Tipo", "Logradouro", "Acao Sugerida"].map((h) =>
+          headerCell(h)
         ),
       }),
       ...data.fatores_urbanos.map(
         (f) =>
           new TableRow({
             children: [f.orgao, f.tipo, f.logradouro, f.acao_sugerida].map(
-              (cell) =>
-                new TableCell({
-                  children: [
-                    new Paragraph({
-                      children: [new TextRun({ text: cell, size: 20 })],
-                    }),
-                  ],
-                })
+              (cell) => bodyCell(cell)
             ),
           })
       ),
     ];
-
     sections.push(
       new Table({
         rows: fatoresRows,
         width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: {
-          top: { style: BorderStyle.SINGLE, size: 1 },
-          bottom: { style: BorderStyle.SINGLE, size: 1 },
-          left: { style: BorderStyle.SINGLE, size: 1 },
-          right: { style: BorderStyle.SINGLE, size: 1 },
-          insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
-          insideVertical: { style: BorderStyle.SINGLE, size: 1 },
-        },
+        borders: ALL_BORDERS,
       })
     );
   }
-
   sections.push(new Paragraph({ children: [] }));
 
-  // Plano de Acao
   sections.push(
     new Paragraph({
       heading: HeadingLevel.HEADING_1,
-      children: [new TextRun({ text: "5. PLANO DE ACAO", bold: true })],
+      children: [
+        new TextRun({ text: "6. PLANO DE ACAO E RESPONSABILIZACAO", bold: true }),
+      ],
     })
   );
-
   for (const plano of data.plano_acao) {
     sections.push(
       new Paragraph({
@@ -226,7 +246,7 @@ export function buildRelintDocument(data: ReportData): Document {
     for (const acao of plano.acoes) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: `• ${acao}`, size: 22 })],
+          children: [new TextRun({ text: `- ${acao}`, size: 22 })],
         })
       );
     }
