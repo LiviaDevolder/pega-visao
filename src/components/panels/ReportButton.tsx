@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Button, Spinner } from "@chakra-ui/react";
+import { TOUCH_TARGET } from "@/lib/responsive";
 
 interface ReportButtonProps {
   areaFmId: number;
   areaName: string;
+  /** Largura total com área de toque de 44px (uso em cartões no celular). */
+  fullWidth?: boolean;
 }
 
-export function ReportButton({ areaFmId, areaName }: ReportButtonProps) {
+export function ReportButton({ areaFmId, areaName, fullWidth }: ReportButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
@@ -45,6 +48,8 @@ export function ReportButton({ areaFmId, areaName }: ReportButtonProps) {
   return (
     <Button
       size="sm"
+      w={fullWidth ? "100%" : undefined}
+      minH={fullWidth ? TOUCH_TARGET : undefined}
       colorPalette="teal"
       onClick={handleGenerate}
       disabled={loading}

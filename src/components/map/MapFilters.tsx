@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Box, Stack, Text, Input, HStack, IconButton } from "@chakra-ui/react";
 import { NativeSelect } from "@chakra-ui/react";
+import { TOUCH_TARGET, Z_INDEX } from "@/lib/responsive";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 export interface LocalMapFilters {
   dia_semana?: string;
@@ -13,6 +14,8 @@ export interface LocalMapFilters {
 interface MapFiltersPanelProps {
   filters: LocalMapFilters;
   onFilterChange: (filters: LocalMapFilters) => void;
+  collapsed: boolean;
+  onCollapsedChange: (collapsed: boolean) => void;
 }
 
 const DIAS_SEMANA = [
@@ -28,32 +31,59 @@ const DIAS_SEMANA = [
 export function MapFiltersPanel({
   filters,
   onFilterChange,
+  collapsed,
+  onCollapsedChange,
 }: MapFiltersPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
-
+  const isMobile = useIsMobile();
   return (
     <Box
       position="absolute"
       top={4}
-      left={4}
-      zIndex={1000}
+      left={{ base: "56px", md: 4 }}
+      zIndex={Z_INDEX.mapOverlay}
       bg="white"
       borderRadius="lg"
       p={collapsed ? 2 : 4}
       shadow="lg"
       minW={collapsed ? "auto" : "220px"}
-      maxH="80vh"
+      maxW={{ base: "calc(100% - 72px)", md: "none" }}
+      maxH="80dvh"
       overflowY="auto"
+      cursor={collapsed ? "pointer" : undefined}
+      minH={collapsed ? { base: TOUCH_TARGET, md: "auto" } : undefined}
+      display={collapsed ? "flex" : undefined}
+      alignItems={collapsed ? "center" : undefined}
+      onClick={collapsed ? () => onCollapsedChange(false) : undefined}
+      {...(collapsed && isMobile
+        ? {
+            role: "button",
+            tabIndex: 0,
+            "aria-label": "Expandir filtros temporais",
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") onCollapsedChange(false);
+            },
+          }
+        : {})}
     >
-      <HStack justify="space-between" mb={collapsed ? 0 : 3}>
+      <HStack justify="space-between" mb={collapsed ? 0 : 3} gap={2}>
         <Text fontWeight="bold" fontSize="sm" color="gray.700">
           {collapsed ? "⏱" : "Filtros Temporais"}
+          {collapsed && (
+            <Box as="span" display={{ base: "inline", md: "none" }} ml={2}>
+              Horário
+            </Box>
+          )}
         </Text>
         <IconButton
-          aria-label={collapsed ? "Expandir" : "Recolher"}
-          size="2xs"
+          aria-label={collapsed ? "Expandir filtros temporais" : "Recolher filtros temporais"}
+          size={{ base: "md", md: "2xs" }}
+          minW={{ base: TOUCH_TARGET, md: "auto" }}
+          display={collapsed ? { base: "none", md: "inline-flex" } : undefined}
           variant="ghost"
-          onClick={() => setCollapsed((v) => !v)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCollapsedChange(!collapsed);
+          }}
         >
           {collapsed ? "›" : "‹"}
         </IconButton>
@@ -65,7 +95,7 @@ export function MapFiltersPanel({
             <Text fontSize="xs" color="gray.500" mb={1}>
               Dia da Semana
             </Text>
-            <NativeSelect.Root size="sm">
+            <NativeSelect.Root size={{ base: "lg", md: "sm" }}>
               <NativeSelect.Field
                 value={filters.dia_semana || ""}
                 onChange={(e) =>
@@ -92,7 +122,7 @@ export function MapFiltersPanel({
             </Text>
             <Box display="flex" gap={2} alignItems="center">
               <Input
-                size="sm"
+                size={{ base: "lg", md: "sm" }}
                 type="number"
                 min={0}
                 max={23}
@@ -109,7 +139,7 @@ export function MapFiltersPanel({
               />
               <Text fontSize="xs">-</Text>
               <Input
-                size="sm"
+                size={{ base: "lg", md: "sm" }}
                 type="number"
                 min={0}
                 max={23}

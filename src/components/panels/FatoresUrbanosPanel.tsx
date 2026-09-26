@@ -14,6 +14,7 @@ import {
 import { FatorCard } from "./FatorCard";
 import { ActionPlanSummary } from "./ActionPlanSummary";
 import type { FatoresPorOrgao } from "@/lib/fatores-queries";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 
 interface FatoresUrbanosPanelProps {
   areaFmId: number;
@@ -40,18 +41,10 @@ export function FatoresUrbanosPanel({
   }, [areaFmId]);
 
   return (
-    <Box
-      position="absolute"
-      right={4}
-      top={4}
-      bottom={4}
-      zIndex={1001}
-      bg="white"
-      borderRadius="lg"
-      p={5}
-      shadow="xl"
-      w="420px"
-      overflowY="auto"
+    <BottomSheet
+      title="Fatores urbanos"
+      onClose={onClose}
+      desktop={{ right: 4, top: 4, bottom: 4, w: "420px", borderRadius: "lg" }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
@@ -60,7 +53,14 @@ export function FatoresUrbanosPanel({
           </Badge>
           <Heading size="md">{areaName}</Heading>
         </Stack>
-        <IconButton aria-label="Fechar" size="sm" variant="ghost" onClick={onClose}>
+        {/* No celular o botão de fechar fica na barra do BottomSheet */}
+        <IconButton
+          aria-label="Fechar"
+          size="sm"
+          variant="ghost"
+          display={{ base: "none", md: "inline-flex" }}
+          onClick={onClose}
+        >
           X
         </IconButton>
       </Box>
@@ -127,6 +127,6 @@ export function FatoresUrbanosPanel({
           </Tabs.Root>
         </Stack>
       )}
-    </Box>
+    </BottomSheet>
   );
 }

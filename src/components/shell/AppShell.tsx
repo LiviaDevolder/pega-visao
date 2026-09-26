@@ -2,18 +2,20 @@
 
 import { Box } from "@chakra-ui/react";
 import { Sidebar, SIDEBAR_WIDTH } from "./Sidebar";
-import { Header, HEADER_HEIGHT } from "./Header";
+import { Header } from "./Header";
+import { HEADER_HEIGHT, SCREEN_HEIGHT } from "@/lib/responsive";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <Box minH="100vh" bg="gray.50">
+    <Box minH={SCREEN_HEIGHT} bg="gray.50">
       <Sidebar />
       <Header />
       <Box
         as="main"
-        ml={SIDEBAR_WIDTH}
+        ml={{ base: 0, md: SIDEBAR_WIDTH }}
         pt={HEADER_HEIGHT}
-        minH="100vh"
+        minH={SCREEN_HEIGHT}
+        minW={0}
       >
         {children}
       </Box>

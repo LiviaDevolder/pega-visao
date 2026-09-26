@@ -1,5 +1,6 @@
 "use client";
 
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { useState } from "react";
 import {
   Box,
@@ -125,18 +126,10 @@ export function AreaAnalysisPanel({
   };
 
   return (
-    <Box
-      position="absolute"
-      right={4}
-      top={4}
-      bottom={4}
-      zIndex={1001}
-      bg="white"
-      borderRadius="lg"
-      p={5}
-      shadow="xl"
-      w="460px"
-      overflowY="auto"
+    <BottomSheet
+      title="Análise IA"
+      onClose={onClose}
+      desktop={{ right: 4, top: 4, bottom: 4, w: "460px", borderRadius: "lg" }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
@@ -145,10 +138,12 @@ export function AreaAnalysisPanel({
           </Badge>
           <Heading size="md">{areaName}</Heading>
         </Stack>
+        {/* No celular o botão de fechar fica na barra do BottomSheet */}
         <IconButton
           aria-label="Fechar"
           size="sm"
           variant="ghost"
+          display={{ base: "none", md: "inline-flex" }}
           onClick={onClose}
         >
           X
@@ -246,6 +241,6 @@ export function AreaAnalysisPanel({
           </Box>
         </Stack>
       )}
-    </Box>
+    </BottomSheet>
   );
 }

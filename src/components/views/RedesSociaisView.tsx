@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import type { SocialMention } from "@/lib/social/social-mentions-repository";
 import { AREAS_FM_KEYWORDS } from "@/lib/social/keywords-areas-fm";
+import { VIEW_HEIGHT } from "@/lib/responsive";
 
 const TIPOS_CRIME = ["roubo", "furto", "arrastao", "tiroteio", "outros"];
 
@@ -92,12 +93,12 @@ export function RedesSociaisView() {
   }, [mentions]);
 
   return (
-    <Box minH="calc(100vh - 56px)" display="flex" flexDirection="column">
+    <Box minH={VIEW_HEIGHT} display="flex" flexDirection="column">
       <Box
         bg="white"
         borderBottom="1px solid"
         borderColor="gray.200"
-        px={6}
+        px={{ base: 4, md: 6 }}
         py={4}
       >
         <Stack gap={3}>
@@ -112,7 +113,7 @@ export function RedesSociaisView() {
               </Text>
             </Stack>
 
-            <HStack gap={6}>
+            <HStack gap={{ base: 4, md: 6 }} wrap="wrap">
               <Stack gap={0} align="end">
                 <Text fontSize="2xs" color="gray.500">
                   Alta relevância
@@ -151,13 +152,13 @@ export function RedesSociaisView() {
 
           <HStack gap={3} wrap="wrap">
             <Input
-              size="sm"
+              size={{ base: "lg", md: "sm" }}
               placeholder="Buscar texto, autor ou local..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              maxW="320px"
+              maxW={{ base: "100%", md: "320px" }}
             />
-            <NativeSelect.Root size="sm" maxW="220px">
+            <NativeSelect.Root size={{ base: "lg", md: "sm" }} maxW={{ base: "100%", md: "220px" }}>
               <NativeSelect.Field
                 value={areaFilter}
                 onChange={(e) => setAreaFilter(e.target.value)}
@@ -171,7 +172,7 @@ export function RedesSociaisView() {
               </NativeSelect.Field>
               <NativeSelect.Indicator />
             </NativeSelect.Root>
-            <NativeSelect.Root size="sm" maxW="160px">
+            <NativeSelect.Root size={{ base: "lg", md: "sm" }} maxW={{ base: "100%", md: "160px" }}>
               <NativeSelect.Field
                 value={tipoFilter}
                 onChange={(e) => setTipoFilter(e.target.value)}
@@ -185,7 +186,7 @@ export function RedesSociaisView() {
               </NativeSelect.Field>
               <NativeSelect.Indicator />
             </NativeSelect.Root>
-            <NativeSelect.Root size="sm" maxW="160px">
+            <NativeSelect.Root size={{ base: "lg", md: "sm" }} maxW={{ base: "100%", md: "160px" }}>
               <NativeSelect.Field
                 value={relevanciaMinima}
                 onChange={(e) => setRelevanciaMinima(e.target.value)}
@@ -205,7 +206,7 @@ export function RedesSociaisView() {
         </Stack>
       </Box>
 
-      <Box flex={1} overflowY="auto" bg="gray.50" p={6}>
+      <Box flex={1} overflowY="auto" bg="gray.50" p={{ base: 3, md: 6 }}>
         {loading && mentions.length === 0 ? (
           <Box textAlign="center" py={12}>
             <Spinner size="lg" />

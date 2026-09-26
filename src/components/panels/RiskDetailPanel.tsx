@@ -1,5 +1,6 @@
 "use client";
 
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -56,18 +57,10 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
     layersCount >= 3 ? "red" : layersCount === 2 ? "orange" : "yellow";
 
   return (
-    <Box
-      position="absolute"
-      right={4}
-      bottom={4}
-      zIndex={1000}
-      bg="white"
-      borderRadius="lg"
-      p={5}
-      shadow="xl"
-      maxW="380px"
-      maxH="70vh"
-      overflowY="auto"
+    <BottomSheet
+      title="Risco da área"
+      onClose={onClose}
+      desktop={{ right: 4, bottom: 4, maxW: "380px", maxH: "70dvh", borderRadius: "lg" }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
@@ -87,7 +80,14 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
             {area.area_km2.toFixed(2)} km2
           </Text>
         </Stack>
-        <IconButton aria-label="Fechar" size="sm" variant="ghost" onClick={onClose}>
+        {/* No celular o botão de fechar fica na barra do BottomSheet */}
+        <IconButton
+          aria-label="Fechar"
+          size="sm"
+          variant="ghost"
+          display={{ base: "none", md: "inline-flex" }}
+          onClick={onClose}
+        >
           X
         </IconButton>
       </Box>
@@ -162,6 +162,6 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
           </Box>
         </Stack>
       ) : null}
-    </Box>
+    </BottomSheet>
   );
 }

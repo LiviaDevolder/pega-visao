@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import type { FatorUrbano } from "@/types/geo";
 import { getActionSuggestion } from "@/lib/action-plan-builder";
+import { TOUCH_TARGET, VIEW_HEIGHT } from "@/lib/responsive";
 
 interface OrgaoGroup {
   orgao: string;
@@ -66,12 +67,12 @@ export function PlanoAcaoView() {
   const collapseAll = () => setExpandedOrgaos(new Set());
 
   return (
-    <Box minH="calc(100vh - 56px)" display="flex" flexDirection="column">
+    <Box minH={VIEW_HEIGHT} display="flex" flexDirection="column">
       <Box
         bg="white"
         borderBottom="1px solid"
         borderColor="gray.200"
-        px={6}
+        px={{ base: 4, md: 6 }}
         py={4}
       >
         <HStack justify="space-between" align="center" wrap="wrap" gap={4}>
@@ -85,12 +86,12 @@ export function PlanoAcaoView() {
             </Text>
           </Stack>
 
-          <HStack gap={4}>
+          <HStack gap={{ base: 2, md: 4 }} wrap="wrap" w={{ base: "100%", md: "auto" }}>
             <Badge colorPalette="blue" size="lg" p={2}>
               {totalAcoes} ações
             </Badge>
-            <Box minW="220px">
-              <NativeSelect.Root size="sm">
+            <Box minW={{ base: 0, md: "220px" }} flex={{ base: 1, md: "none" }}>
+              <NativeSelect.Root size={{ base: "lg", md: "sm" }}>
                 <NativeSelect.Field
                   value={orgaoFilter}
                   onChange={(e) => setOrgaoFilter(e.target.value)}
@@ -105,17 +106,17 @@ export function PlanoAcaoView() {
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
             </Box>
-            <Button size="xs" variant="outline" onClick={expandAll}>
+            <Button size={{ base: "md", md: "xs" }} minH={{ base: TOUCH_TARGET, md: "auto" }} flex={{ base: 1, md: "none" }} variant="outline" onClick={expandAll}>
               Expandir tudo
             </Button>
-            <Button size="xs" variant="outline" onClick={collapseAll}>
+            <Button size={{ base: "md", md: "xs" }} minH={{ base: TOUCH_TARGET, md: "auto" }} flex={{ base: 1, md: "none" }} variant="outline" onClick={collapseAll}>
               Recolher tudo
             </Button>
           </HStack>
         </HStack>
       </Box>
 
-      <Box flex={1} overflowY="auto" bg="gray.50" p={6}>
+      <Box flex={1} overflowY="auto" bg="gray.50" p={{ base: 3, md: 6 }}>
         {loading ? (
           <Box textAlign="center" py={12}>
             <Spinner size="lg" />

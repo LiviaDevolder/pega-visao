@@ -17,6 +17,7 @@ import { RiskZonesLayer } from "../map/layers/RiskZonesLayer";
 import { RiskRadiusControl } from "../map/RiskRadiusControl";
 import { RiskTop10Panel } from "../panels/RiskTop10Panel";
 import { RiskDetailPanel } from "../panels/RiskDetailPanel";
+import { VIEW_HEIGHT } from "@/lib/responsive";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
 const DEFAULT_ZOOM = 12;
@@ -63,7 +64,7 @@ export function CoincidenciasView() {
   }).length;
 
   return (
-    <Box h="calc(100vh - 56px)" display="flex" flexDirection="column">
+    <Box h={VIEW_HEIGHT} display="flex" flexDirection="column">
       <Box
         bg="white"
         borderBottom="1px solid"

@@ -24,6 +24,8 @@ import { AreaFmDetail } from "../panels/AreaFmDetail";
 import { AreaAnalysisPanel } from "../panels/AreaAnalysisPanel";
 import { FatoresUrbanosPanel } from "../panels/FatoresUrbanosPanel";
 import { useGlobalFilters } from "@/lib/hooks/useGlobalFilters";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
+import { VIEW_HEIGHT } from "@/lib/responsive";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
 const DEFAULT_ZOOM = 12;
@@ -46,6 +48,29 @@ export function MapView() {
     cameras: false,
   });
   const [loading, setLoading] = useState(true);
+
+  // Desktop: os dois painéis começam abertos e são independentes.
+  // Celular: começam recolhidos e só um fica aberto por vez, para não cobrirem o mapa nem um ao outro.
+  const isMobile = useIsMobile();
+  const [layersCollapsed, setLayersCollapsed] = useState(false);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (isMobile) {
+      setLayersCollapsed(true);
+      setFiltersCollapsed(true);
+    }
+  }, [isMobile]);
+
+  const handleLayersCollapsed = (collapsed: boolean) => {
+    setLayersCollapsed(collapsed);
+    if (isMobile && !collapsed) setFiltersCollapsed(true);
+  };
+
+  const handleFiltersCollapsed = (collapsed: boolean) => {
+    setFiltersCollapsed(collapsed);
+    if (isMobile && !collapsed) setLayersCollapsed(true);
+  };
 
   const fetchHeatmap = useCallback(async () => {
     const params = new URLSearchParams();
@@ -105,7 +130,7 @@ export function MapView() {
   };
 
   return (
-    <Box position="relative" h="calc(100vh - 56px)" w="100%">
+    <Box position="relative" h={VIEW_HEIGHT} w="100%">
       <LeafletMap
         center={RIO_CENTER}
         zoom={DEFAULT_ZOOM}
@@ -129,11 +154,15 @@ export function MapView() {
         layers={layers}
         onToggle={handleLayerToggle}
         loading={loading}
+        collapsed={layersCollapsed}
+        onCollapsedChange={handleLayersCollapsed}
       />
 
       <MapFiltersPanel
         filters={localFilters}
         onFilterChange={setLocalFilters}
+        collapsed={filtersCollapsed}
+        onCollapsedChange={handleFiltersCollapsed}
       />
 
       {selectedArea && (
