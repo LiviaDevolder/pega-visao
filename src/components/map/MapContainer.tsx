@@ -20,6 +20,8 @@ import {
   type MapLayerVisibility,
 } from "./MapControls";
 import { MapFiltersPanel, type LocalMapFilters } from "./MapFilters";
+import { HeatmapLegend } from "./HeatmapLegend";
+import { NearestAreaTap } from "./NearestAreaTap";
 import { AreaFmDetail } from "../panels/AreaFmDetail";
 import { AreaAnalysisPanel } from "../panels/AreaAnalysisPanel";
 import { FatoresUrbanosPanel } from "../panels/FatoresUrbanosPanel";
@@ -164,6 +166,7 @@ export function MapView() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <NearestAreaTap areas={areas} enabled={isMobile} onPick={handleAreaClick} />
         {layers.heatmap && <HeatmapLayer points={heatPoints} />}
         {layers.fatoresUrbanos && <FatoresUrbanosLayer fatores={fatores} />}
         {layers.areasFm && (
@@ -179,6 +182,8 @@ export function MapView() {
         collapsed={layersCollapsed}
         onCollapsedChange={handleLayersCollapsed}
       />
+
+      {layers.heatmap && <HeatmapLegend />}
 
       <MapFiltersPanel
         filters={localFilters}

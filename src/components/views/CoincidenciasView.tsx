@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { MapContainer as LeafletMap, TileLayer, useMap } from "react-leaflet";
+import { MapContainer as LeafletMap, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import {
   Box,
   Button,
@@ -25,6 +25,32 @@ const DEFAULT_ZOOM = 12;
 
 type MobileTab = "lista" | "mapa";
 
+interface FocusPoint {
+  lat: number;
+  lng: number;
+  label: string;
+  /** Muda a cada clique, para o mapa recentralizar mesmo ao clicar no mesmo ponto de novo. */
+  seq: number;
+}
+
+const FOCUS_ZOOM = 16;
+
+// Centraliza o mapa no hotspot escolhido na lista. Espera o MapResizer (que remede o mapa ao
+// voltar para a aba "Mapa" no celular) antes de mover a câmera.
+function MapFocus({ point }: { point: FocusPoint | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!point) return;
+    const id = setTimeout(() => {
+      map.invalidateSize();
+      // Aba em segundo plano não roda as animações do Leaflet: nesse caso a câmera pula direto.
+      map.setView([point.lat, point.lng], Math.max(map.getZoom(), FOCUS_ZOOM), { animate: !document.hidden });
+    }, 150);
+    return () => clearTimeout(id);
+  }, [point, map]);
+  return null;
+}
+
 // O Leaflet mede o contêiner ao montar. Escondido (aba "Lista" no celular) ele fica com
 // largura 0; ao voltar para a aba "Mapa" é preciso remedir.
 function MapResizer({ active }: { active: boolean }) {
@@ -44,6 +70,7 @@ export function CoincidenciasView() {
   const [selectedRiskArea, setSelectedRiskArea] = useState<RiskScore | null>(null);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<MobileTab>("lista");
+  const [focus, setFocus] = useState<FocusPoint | null>(null);
 
   const fetchRiskData = useCallback(async (r: number) => {
     setLoading(true);
@@ -64,7 +91,13 @@ export function CoincidenciasView() {
   }, [radius, fetchRiskData]);
 
   const handleHotspotClick = (hotspot: RiskHotspot) => {
-    console.log("Hotspot clicked:", hotspot);
+    setFocus((prev) => ({
+      lat: hotspot.latitude,
+      lng: hotspot.longitude,
+      label: hotspot.logradouro || "Local não identificado",
+      seq: (prev?.seq ?? 0) + 1,
+    }));
+    setTab("mapa"); // no celular a lista e o mapa ficam em abas; no desktop não muda nada
   };
 
   const handleRiskAreaClick = (area: RiskScore) => {
@@ -192,6 +225,17 @@ export function CoincidenciasView() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <MapResizer active={tab === "mapa"} />
+            <MapFocus point={focus} />
+            {focus && (
+              <CircleMarker
+                key={focus.seq}
+                center={[focus.lat, focus.lng]}
+                radius={14}
+                pathOptions={{ color: "#a50f15", weight: 3, fillColor: "#de2d26", fillOpacity: 0.35 }}
+              >
+                <Popup>{focus.label}</Popup>
+              </CircleMarker>
+            )}
             <RiskZonesLayer
               areas={riskScores}
               onAreaClick={handleRiskAreaClick}
