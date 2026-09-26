@@ -29,6 +29,10 @@ export function CoberturaFmView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // O pacote de dados traz só as áreas com polígono (hoje 8 das 22 do programa): o texto usa o número real.
+  const nAreas = allocation?.length || areas.length;
+  const areasLabel = nAreas > 0 ? `${nAreas} áreas` : "áreas";
+
   useEffect(() => {
     fetch("/api/geo/areas-fm")
       .then((r) => r.json())
@@ -78,7 +82,7 @@ export function CoberturaFmView() {
               👮 Cobertura da Força Municipal
             </Heading>
             <Text fontSize="sm" color="gray.600" display={{ base: "none", md: "block" }}>
-              Distribuição sugerida de 600 agentes pelas 22 áreas, com modelo de
+              Distribuição sugerida de 600 agentes pelas {areasLabel}, com modelo de
               emprego e turnos prioritários
             </Text>
           </Stack>
@@ -138,7 +142,7 @@ export function CoberturaFmView() {
               <Text fontSize="sm" color="gray.500">
                 Clique em <strong>Gerar Sugestão</strong> para que a IA analise
                 dados criminais, fatores urbanos e risco para distribuir os
-                agentes da FM nas 22 áreas.
+                agentes da FM nas {areasLabel}.
               </Text>
             </Stack>
           </Box>

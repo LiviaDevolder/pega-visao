@@ -28,8 +28,8 @@ export function AreaFmDetail({ area, onClose, onAnalyze, onShowFatores }: AreaFm
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={2}>
-          <Badge colorPalette="blue" w="fit-content">
-            Area FM
+          <Badge colorPalette="blue" w="fit-content" display={{ base: "none", md: "inline-flex" }}>
+            Área FM
           </Badge>
           <Heading size="md" color="gray.800">
             {area.nome_area_fm}
@@ -50,7 +50,7 @@ export function AreaFmDetail({ area, onClose, onAnalyze, onShowFatores }: AreaFm
       <Stack gap={3} mt={4}>
         <Box display="flex" justifyContent="space-between">
           <Text fontSize="sm" color="gray.600">
-            Total de Ocorrencias
+            Total de Ocorrências
           </Text>
           <Text fontSize="sm" fontWeight="bold" color="red.600">
             {area.total_ocorrencias?.toLocaleString("pt-BR") || "—"}
@@ -66,10 +66,11 @@ export function AreaFmDetail({ area, onClose, onAnalyze, onShowFatores }: AreaFm
           </Text>
         </Box>
 
-        <Box display="flex" gap={2} mt={2} flexWrap="wrap">
+        <Box display="flex" gap={2} mt={2} flexWrap="wrap" flexDirection={{ base: "column", md: "row" }}>
           {onAnalyze && (
             <Button
-              size="sm"
+              size={{ base: "md", md: "sm" }}
+              minH={{ base: "44px", md: "auto" }}
               colorPalette="purple"
               onClick={() => onAnalyze(area)}
             >
@@ -78,14 +79,15 @@ export function AreaFmDetail({ area, onClose, onAnalyze, onShowFatores }: AreaFm
           )}
           {onShowFatores && (
             <Button
-              size="sm"
+              size={{ base: "md", md: "sm" }}
+              minH={{ base: "44px", md: "auto" }}
               colorPalette="orange"
               onClick={() => onShowFatores(area)}
             >
               Fatores Urbanos
             </Button>
           )}
-          <ReportButton areaFmId={area.id} areaName={area.nome_area_fm} />
+          <ReportButton areaFmId={area.id} areaName={area.nome_area_fm} fullWidth />
         </Box>
       </Stack>
     </BottomSheet>

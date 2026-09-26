@@ -50,7 +50,7 @@ export function AreasFmLayer({ areas, onAreaClick }: AreasFmLayerProps) {
             <Popup>
               <strong>{area.nome_area_fm}</strong>
               <br />
-              Ocorrencias: {area.total_ocorrencias?.toLocaleString("pt-BR")}
+              Ocorrências: {area.total_ocorrencias?.toLocaleString("pt-BR")}
               <br />
               Fatores Urbanos: {area.total_fatores}
             </Popup>

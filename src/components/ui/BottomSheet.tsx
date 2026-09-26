@@ -5,8 +5,8 @@ import type { BoxProps } from "@chakra-ui/react";
 import { Z_INDEX } from "@/lib/responsive";
 
 // Estilo aplicado abaixo do breakpoint `md`: painel colado no rodapé, largura total.
+// `position` não entra aqui: é igual nos dois breakpoints e vira `unset` (estático) no desktop se ficar.
 const MOBILE_STYLE: Record<string, unknown> = {
-  position: "absolute",
   left: 0,
   right: 0,
   bottom: 0,
@@ -62,6 +62,7 @@ export function BottomSheet({
     <Box
       role="dialog"
       aria-label={title}
+      position="absolute"
       zIndex={Z_INDEX.sheet}
       bg="white"
       shadow="xl"

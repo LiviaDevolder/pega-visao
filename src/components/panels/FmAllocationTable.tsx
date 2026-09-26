@@ -22,10 +22,10 @@ export function FmAllocationTable({ allocation }: FmAllocationTableProps) {
       <Table.Root size="sm">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader>Area FM</Table.ColumnHeader>
+            <Table.ColumnHeader>Área FM</Table.ColumnHeader>
             <Table.ColumnHeader>Agentes</Table.ColumnHeader>
             <Table.ColumnHeader>Modelo</Table.ColumnHeader>
-            <Table.ColumnHeader>Horarios</Table.ColumnHeader>
+            <Table.ColumnHeader>Horários</Table.ColumnHeader>
             <Table.ColumnHeader>Justificativa</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>

@@ -69,7 +69,7 @@ export function HeatmapDiaHora({ cells }: HeatmapDiaHoraProps) {
   if (cells.length === 0) {
     return (
       <Text fontSize="xs" color="gray.500">
-        Sem dados temporais para esta area.
+        Sem dados temporais para esta área.
       </Text>
     );
   }

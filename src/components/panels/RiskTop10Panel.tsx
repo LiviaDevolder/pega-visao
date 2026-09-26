@@ -40,10 +40,10 @@ export function RiskTop10Panel({
     <Stack gap={2}>
       <Box>
         <Heading size="sm" color="gray.700">
-          Painel de Coincidencias
+          Painel de Coincidências
         </Heading>
         <Text fontSize="xs" color="gray.500">
-          Pontos onde mancha criminal, fatores urbanos e denuncias se sobrepoem
+          Pontos onde mancha criminal, fatores urbanos e denúncias se sobrepõem
         </Text>
       </Box>
 

@@ -24,7 +24,7 @@ export function ReportButton({ areaFmId, areaName, fullWidth }: ReportButtonProp
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao gerar relatorio");
+        throw new Error("Erro ao gerar relatório");
       }
 
       const blob = await res.blob();
@@ -48,13 +48,13 @@ export function ReportButton({ areaFmId, areaName, fullWidth }: ReportButtonProp
   return (
     <Button
       size="sm"
-      w={fullWidth ? "100%" : undefined}
-      minH={fullWidth ? TOUCH_TARGET : undefined}
+      w={fullWidth ? { base: "100%", md: "auto" } : undefined}
+      minH={fullWidth ? { base: TOUCH_TARGET, md: "auto" } : undefined}
       colorPalette="teal"
       onClick={handleGenerate}
       disabled={loading}
     >
-      {loading ? <Spinner size="xs" /> : "Gerar Relatorio"}
+      {loading ? <Spinner size="xs" /> : "Gerar Relatório"}
     </Button>
   );
 }

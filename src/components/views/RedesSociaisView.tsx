@@ -139,7 +139,8 @@ export function RedesSociaisView() {
                 </Text>
               </Stack>
               <Button
-                size="sm"
+                size={{ base: "md", md: "sm" }}
+                minH={{ base: "44px", md: "auto" }}
                 variant="outline"
                 colorPalette="purple"
                 onClick={fetchMentions}
@@ -217,7 +218,9 @@ export function RedesSociaisView() {
         ) : filtered.length === 0 ? (
           <Box textAlign="center" py={12}>
             <Text fontSize="sm" color="gray.500">
-              Nenhuma menção encontrada com os filtros aplicados.
+              {mentions.length === 0
+                ? "Ainda não há menções coletadas. A coleta automática de tweets ainda não foi executada."
+                : "Nenhuma menção encontrada com os filtros aplicados."}
             </Text>
           </Box>
         ) : (

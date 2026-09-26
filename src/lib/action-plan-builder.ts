@@ -70,7 +70,7 @@ export function buildActionPlan(
   const orgaoMap = new Map<string, ActionPlan["acoes"]>();
 
   for (const fator of fatores) {
-    const orgao = fator.orgao_responsavel || "Nao definido";
+    const orgao = fator.orgao_responsavel || "Não definido";
     const acoes = orgaoMap.get(orgao) || [];
 
     acoes.push({

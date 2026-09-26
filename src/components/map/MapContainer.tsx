@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { MapContainer as LeafletMap, TileLayer } from "react-leaflet";
 import { Box } from "@chakra-ui/react";
 import "leaflet/dist/leaflet.css";
@@ -48,6 +48,7 @@ export function MapView() {
     cameras: false,
   });
   const [loading, setLoading] = useState(true);
+  const [layerLoading, setLayerLoading] = useState(0);
 
   // Desktop: os dois painéis começam abertos e são independentes.
   // Celular: começam recolhidos e só um fica aberto por vez, para não cobrirem o mapa nem um ao outro.
@@ -88,34 +89,55 @@ export function MapView() {
     setHeatPoints(data);
   }, [globalFilters, localFilters]);
 
+  // As áreas FM são a base do mapa e carregam de imediato.
   useEffect(() => {
-    async function loadData() {
+    async function loadAreas() {
       setLoading(true);
       try {
-        const [fatoresRes, areasRes, camerasRes] = await Promise.all([
-          fetch("/api/geo/fatores-urbanos"),
-          fetch("/api/geo/areas-fm"),
-          fetch("/api/geo/cameras"),
-        ]);
-
-        const [fatoresData, areasData, camerasData] = await Promise.all([
-          fatoresRes.json(),
-          areasRes.json(),
-          camerasRes.json(),
-        ]);
-
-        setFatores(fatoresData);
-        setAreas(areasData);
-        setCameras(camerasData);
+        const res = await fetch("/api/geo/areas-fm");
+        setAreas(await res.json());
       } catch (error) {
-        console.error("Erro ao carregar dados do mapa:", error);
+        console.error("Erro ao carregar áreas FM:", error);
       } finally {
         setLoading(false);
       }
     }
 
-    loadData();
+    loadAreas();
   }, []);
+
+  // Fatores urbanos (~530 KB) e câmeras (~190 KB) começam desligados: só são
+  // baixados na primeira vez que a camada é ligada.
+  const fatoresRequested = useRef(false);
+  const camerasRequested = useRef(false);
+
+  useEffect(() => {
+    if (!layers.fatoresUrbanos || fatoresRequested.current) return;
+    fatoresRequested.current = true;
+    setLayerLoading((n) => n + 1);
+    fetch("/api/geo/fatores-urbanos")
+      .then((r) => r.json())
+      .then(setFatores)
+      .catch((error) => {
+        fatoresRequested.current = false; // permite tentar de novo ao religar
+        console.error("Erro ao carregar fatores urbanos:", error);
+      })
+      .finally(() => setLayerLoading((n) => n - 1));
+  }, [layers.fatoresUrbanos]);
+
+  useEffect(() => {
+    if (!layers.cameras || camerasRequested.current) return;
+    camerasRequested.current = true;
+    setLayerLoading((n) => n + 1);
+    fetch("/api/geo/cameras")
+      .then((r) => r.json())
+      .then(setCameras)
+      .catch((error) => {
+        camerasRequested.current = false;
+        console.error("Erro ao carregar câmeras:", error);
+      })
+      .finally(() => setLayerLoading((n) => n - 1));
+  }, [layers.cameras]);
 
   useEffect(() => {
     fetchHeatmap();
@@ -153,7 +175,7 @@ export function MapView() {
       <MapControls
         layers={layers}
         onToggle={handleLayerToggle}
-        loading={loading}
+        loading={loading || layerLoading > 0}
         collapsed={layersCollapsed}
         onCollapsedChange={handleLayersCollapsed}
       />

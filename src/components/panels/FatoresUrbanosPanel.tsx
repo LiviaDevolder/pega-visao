@@ -48,7 +48,7 @@ export function FatoresUrbanosPanel({
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
-          <Badge colorPalette="orange" w="fit-content">
+          <Badge colorPalette="orange" w="fit-content" display={{ base: "none", md: "inline-flex" }}>
             Fatores Urbanos
           </Badge>
           <Heading size="md">{areaName}</Heading>
@@ -72,17 +72,22 @@ export function FatoresUrbanosPanel({
       ) : !data || data.length === 0 ? (
         <Box mt={6} p={4} bg="gray.50" borderRadius="md">
           <Text fontSize="sm" color="gray.600">
-            Nenhum fator urbano encontrado nesta area FM.
+            Nenhum fator urbano encontrado nesta área FM.
           </Text>
         </Box>
       ) : showPlan ? (
         <Box mt={4}>
           <Box display="flex" justifyContent="space-between" mb={3}>
             <Text fontWeight="bold" fontSize="sm">
-              Plano de Acao Consolidado
+              Plano de Ação Consolidado
             </Text>
             <Badge
               cursor="pointer"
+              role="button"
+              tabIndex={0}
+              minH={{ base: "44px", md: "auto" }}
+              px={{ base: 3, md: 2 }}
+              alignItems="center"
               onClick={() => setShowPlan(false)}
               colorPalette="gray"
             >
@@ -99,17 +104,22 @@ export function FatoresUrbanosPanel({
             </Badge>
             <Badge
               cursor="pointer"
+              role="button"
+              tabIndex={0}
+              minH={{ base: "44px", md: "auto" }}
+              px={{ base: 3, md: 2 }}
+              alignItems="center"
               onClick={() => setShowPlan(true)}
               colorPalette="teal"
             >
-              Ver Plano de Acao
+              Ver Plano de Ação
             </Badge>
           </Box>
 
           <Tabs.Root defaultValue={data[0]?.orgao} variant="outline" size="sm">
             <Tabs.List flexWrap="wrap">
               {data.map((group) => (
-                <Tabs.Trigger key={group.orgao} value={group.orgao}>
+                <Tabs.Trigger key={group.orgao} value={group.orgao} minH={{ base: "44px", md: "auto" }}>
                   {group.orgao} ({group.total})
                 </Tabs.Trigger>
               ))}

@@ -76,7 +76,7 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
           </Box>
           <Heading size="sm">{area.nome_area_fm}</Heading>
           <Text fontSize="xs" color="gray.500">
-            Score: {area.risk_score.toFixed(4)} | Area:{" "}
+            Score: {area.risk_score.toFixed(4)} | Área:{" "}
             {area.area_km2.toFixed(2)} km2
           </Text>
         </Stack>
@@ -100,7 +100,7 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
         <Stack gap={4} mt={4}>
           <Box>
             <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-              Ocorrencias por Tipo
+              Ocorrências por Tipo
             </Text>
             {detail.ocorrencias.map((o, i) => (
               <Box
@@ -142,7 +142,7 @@ export function RiskDetailPanel({ area, onClose }: RiskDetailPanelProps) {
 
           <Box>
             <Text fontWeight="bold" fontSize="sm" mb={2} color="gray.700">
-              Denuncias por Classe
+              Denúncias por Classe
             </Text>
             {detail.denuncias.map((d, i) => (
               <Box
