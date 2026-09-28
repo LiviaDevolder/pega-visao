@@ -39,7 +39,7 @@ export function MapFiltersPanel({
     <Box
       position="absolute"
       top={4}
-      left={{ base: "56px", md: 4 }}
+      left="56px"
       zIndex={Z_INDEX.mapOverlay}
       bg="white"
       borderRadius="lg"
