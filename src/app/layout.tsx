@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { AppShell } from "@/components/shell/AppShell";
+import { SplashScreen } from "@/components/shell/SplashScreen";
 
 export const metadata: Metadata = {
   title: "Pega Visão — Inteligência CompStat Rio",
@@ -29,6 +30,7 @@ export default function RootLayout({
       </head>
       <body style={{ margin: 0, padding: 0 }}>
         <Providers>
+          <SplashScreen />
           <AppShell>{children}</AppShell>
         </Providers>
       </body>
