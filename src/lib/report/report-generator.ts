@@ -49,7 +49,7 @@ export async function generateReport(
   }));
 
   const fatoresUrbanos = areaData.fatores_por_orgao.map((f) => ({
-    orgao: f.orgao_responsavel || "Nao definido",
+    orgao: f.orgao_responsavel || "Não definido",
     tipo: f.tipo || "Nao especificado",
     logradouro: "Area FM",
     acao_sugerida: getActionSuggestion(f.tipo),

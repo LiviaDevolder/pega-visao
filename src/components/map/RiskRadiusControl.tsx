@@ -22,9 +22,9 @@ export function RiskRadiusControl({
   return (
     <Box>
       <Text fontSize="xs" color="gray.500" mb={1}>
-        Raio de Sobreposicao
+        Raio de Sobreposição
       </Text>
-      <NativeSelect.Root size="sm">
+      <NativeSelect.Root size={{ base: "lg", md: "sm" }}>
         <NativeSelect.Field
           value={radius}
           onChange={(e) => onRadiusChange(Number(e.target.value))}

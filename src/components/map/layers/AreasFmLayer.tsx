@@ -3,6 +3,7 @@
 import { GeoJSON, Popup } from "react-leaflet";
 import type { AreaFm } from "@/types/geo";
 import type { Feature, Geometry } from "geojson";
+import { DomEvent } from "leaflet";
 import type { LeafletMouseEvent, PathOptions } from "leaflet";
 
 interface AreasFmLayerProps {
@@ -38,7 +39,10 @@ export function AreasFmLayer({ areas, onAreaClick }: AreasFmLayerProps) {
             data={feature}
             style={areaStyle}
             eventHandlers={{
-              click: () => onAreaClick(area),
+              click: (e: LeafletMouseEvent) => {
+                DomEvent.stopPropagation(e); // não deixa o clique subir para o mapa (NearestAreaTap)
+                onAreaClick(area);
+              },
               mouseover: (e: LeafletMouseEvent) => {
                 e.target.setStyle(hoverStyle);
               },
@@ -50,7 +54,7 @@ export function AreasFmLayer({ areas, onAreaClick }: AreasFmLayerProps) {
             <Popup>
               <strong>{area.nome_area_fm}</strong>
               <br />
-              Ocorrencias: {area.total_ocorrencias?.toLocaleString("pt-BR")}
+              Ocorrências: {area.total_ocorrencias?.toLocaleString("pt-BR")}
               <br />
               Fatores Urbanos: {area.total_fatores}
             </Popup>

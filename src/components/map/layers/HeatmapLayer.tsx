@@ -6,6 +6,15 @@ import L from "leaflet";
 import "leaflet.heat";
 import type { HeatPoint } from "@/types/geo";
 
+// Compartilhado com a legenda do mapa, para as duas sempre usarem as mesmas cores.
+export const HEATMAP_GRADIENT: Record<number, string> = {
+  0.2: "#fee5d9",
+  0.4: "#fcae91",
+  0.6: "#fb6a4a",
+  0.8: "#de2d26",
+  1.0: "#a50f15",
+};
+
 interface HeatmapLayerProps {
   points: HeatPoint[];
 }
@@ -33,13 +42,7 @@ export function HeatmapLayer({ points }: HeatmapLayerProps) {
       max: p95,
       maxZoom: 17,
       minOpacity: 0.25,
-      gradient: {
-        0.2: "#fee5d9",
-        0.4: "#fcae91",
-        0.6: "#fb6a4a",
-        0.8: "#de2d26",
-        1.0: "#a50f15",
-      },
+      gradient: HEATMAP_GRADIENT,
     });
 
     heat.addTo(map);

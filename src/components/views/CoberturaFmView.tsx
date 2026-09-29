@@ -18,6 +18,7 @@ import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 import { AreasFmLayer } from "../map/layers/AreasFmLayer";
 import { FmAllocationLayer } from "../map/layers/FmAllocationLayer";
 import { FmAllocationTable } from "../panels/FmAllocationTable";
+import { TOUCH_TARGET, VIEW_HEIGHT } from "@/lib/responsive";
 
 const RIO_CENTER: [number, number] = [-22.9068, -43.1729];
 const DEFAULT_ZOOM = 11;
@@ -27,6 +28,10 @@ export function CoberturaFmView() {
   const [areas, setAreas] = useState<AreaFm[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // O pacote de dados traz só as áreas com polígono (hoje 8 das 22 do programa): o texto usa o número real.
+  const nAreas = allocation?.length || areas.length;
+  const areasLabel = nAreas > 0 ? `${nAreas} áreas` : "áreas";
 
   useEffect(() => {
     fetch("/api/geo/areas-fm")
@@ -58,12 +63,17 @@ export function CoberturaFmView() {
     : 0;
 
   return (
-    <Box h="calc(100vh - 56px)" display="flex" flexDirection="column">
+    <Box
+      h={{ base: "auto", md: VIEW_HEIGHT }}
+      minH={{ base: VIEW_HEIGHT, md: "auto" }}
+      display="flex"
+      flexDirection="column"
+    >
       <Box
         bg="white"
         borderBottom="1px solid"
         borderColor="gray.200"
-        px={6}
+        px={{ base: 4, md: 6 }}
         py={4}
       >
         <HStack justify="space-between" align="center" wrap="wrap" gap={4}>
@@ -71,13 +81,13 @@ export function CoberturaFmView() {
             <Heading size="md" color="#0A2E5C">
               👮 Cobertura da Força Municipal
             </Heading>
-            <Text fontSize="sm" color="gray.600">
-              Distribuição sugerida de 600 agentes pelas 22 áreas, com modelo de
+            <Text fontSize="sm" color="gray.600" display={{ base: "none", md: "block" }}>
+              Distribuição sugerida de 600 agentes pelas {areasLabel}, com modelo de
               emprego e turnos prioritários
             </Text>
           </Stack>
 
-          <HStack gap={4}>
+          <HStack gap={{ base: 2, md: 4 }} wrap="wrap" w={{ base: "100%", md: "auto" }}>
             {allocation && (
               <>
                 <Badge colorPalette="green" size="lg" p={2}>
@@ -90,6 +100,8 @@ export function CoberturaFmView() {
             )}
             <Button
               colorPalette="blue"
+              w={{ base: "100%", md: "auto" }}
+              minH={{ base: TOUCH_TARGET, md: "auto" }}
               onClick={handleGenerate}
               disabled={loading}
             >
@@ -101,14 +113,20 @@ export function CoberturaFmView() {
       </Box>
 
       {error && (
-        <Box bg="red.50" px={6} py={3} borderBottom="1px solid" borderColor="red.200">
+        <Box bg="red.50" px={{ base: 4, md: 6 }} py={3} borderBottom="1px solid" borderColor="red.200">
           <Text fontSize="sm" color="red.700">
             {error}
           </Text>
         </Box>
       )}
 
-      <Box flex={1} display="flex" overflow="hidden">
+      <Box
+        flex={1}
+        display="flex"
+        flexDirection={{ base: "column", md: "row" }}
+        overflow={{ base: "visible", md: "hidden" }}
+        minH={0}
+      >
         {!allocation && !loading && (
           <Box
             flex={1}
@@ -124,7 +142,7 @@ export function CoberturaFmView() {
               <Text fontSize="sm" color="gray.500">
                 Clique em <strong>Gerar Sugestão</strong> para que a IA analise
                 dados criminais, fatores urbanos e risco para distribuir os
-                agentes da FM nas 22 áreas.
+                agentes da FM nas {areasLabel}.
               </Text>
             </Stack>
           </Box>
@@ -148,17 +166,27 @@ export function CoberturaFmView() {
 
         {allocation && (
           <>
+            {/* Celular: mapa em cima (order 1) e a lista rola embaixo (order 2) */}
             <Box
-              w="55%"
+              w={{ base: "100%", md: "55%" }}
+              order={{ base: 2, md: 1 }}
+              flex={{ base: "none", md: "none" }}
+              minH={0}
               bg="gray.50"
-              borderRight="1px solid"
+              borderRight={{ base: "none", md: "1px solid" }}
+              borderTop={{ base: "1px solid", md: "none" }}
               borderColor="gray.200"
-              overflowY="auto"
-              p={4}
+              overflowY={{ base: "visible", md: "auto" }}
+              p={{ base: 3, md: 4 }}
             >
               <FmAllocationTable allocation={allocation} />
             </Box>
-            <Box flex={1} position="relative">
+            <Box
+              flex={{ base: "none", md: 1 }}
+              h={{ base: "32dvh", md: "auto" }}
+              order={{ base: 1, md: 2 }}
+              position="relative"
+            >
               <LeafletMap
                 center={RIO_CENTER}
                 zoom={DEFAULT_ZOOM}

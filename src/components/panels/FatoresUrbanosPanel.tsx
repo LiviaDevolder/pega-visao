@@ -14,6 +14,7 @@ import {
 import { FatorCard } from "./FatorCard";
 import { ActionPlanSummary } from "./ActionPlanSummary";
 import type { FatoresPorOrgao } from "@/lib/fatores-queries";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 
 interface FatoresUrbanosPanelProps {
   areaFmId: number;
@@ -40,27 +41,26 @@ export function FatoresUrbanosPanel({
   }, [areaFmId]);
 
   return (
-    <Box
-      position="absolute"
-      right={4}
-      top={4}
-      bottom={4}
-      zIndex={1001}
-      bg="white"
-      borderRadius="lg"
-      p={5}
-      shadow="xl"
-      w="420px"
-      overflowY="auto"
+    <BottomSheet
+      title="Fatores urbanos"
+      onClose={onClose}
+      desktop={{ right: 4, top: 4, bottom: 4, w: "420px", borderRadius: "lg" }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
-          <Badge colorPalette="orange" w="fit-content">
+          <Badge colorPalette="orange" w="fit-content" display={{ base: "none", md: "inline-flex" }}>
             Fatores Urbanos
           </Badge>
           <Heading size="md">{areaName}</Heading>
         </Stack>
-        <IconButton aria-label="Fechar" size="sm" variant="ghost" onClick={onClose}>
+        {/* No celular o botão de fechar fica na barra do BottomSheet */}
+        <IconButton
+          aria-label="Fechar"
+          size="sm"
+          variant="ghost"
+          display={{ base: "none", md: "inline-flex" }}
+          onClick={onClose}
+        >
           X
         </IconButton>
       </Box>
@@ -72,17 +72,22 @@ export function FatoresUrbanosPanel({
       ) : !data || data.length === 0 ? (
         <Box mt={6} p={4} bg="gray.50" borderRadius="md">
           <Text fontSize="sm" color="gray.600">
-            Nenhum fator urbano encontrado nesta area FM.
+            Nenhum fator urbano encontrado nesta área FM.
           </Text>
         </Box>
       ) : showPlan ? (
         <Box mt={4}>
           <Box display="flex" justifyContent="space-between" mb={3}>
             <Text fontWeight="bold" fontSize="sm">
-              Plano de Acao Consolidado
+              Plano de Ação Consolidado
             </Text>
             <Badge
               cursor="pointer"
+              role="button"
+              tabIndex={0}
+              minH={{ base: "44px", md: "auto" }}
+              px={{ base: 3, md: 2 }}
+              alignItems="center"
               onClick={() => setShowPlan(false)}
               colorPalette="gray"
             >
@@ -99,17 +104,22 @@ export function FatoresUrbanosPanel({
             </Badge>
             <Badge
               cursor="pointer"
+              role="button"
+              tabIndex={0}
+              minH={{ base: "44px", md: "auto" }}
+              px={{ base: 3, md: 2 }}
+              alignItems="center"
               onClick={() => setShowPlan(true)}
               colorPalette="teal"
             >
-              Ver Plano de Acao
+              Ver Plano de Ação
             </Badge>
           </Box>
 
           <Tabs.Root defaultValue={data[0]?.orgao} variant="outline" size="sm">
             <Tabs.List flexWrap="wrap">
               {data.map((group) => (
-                <Tabs.Trigger key={group.orgao} value={group.orgao}>
+                <Tabs.Trigger key={group.orgao} value={group.orgao} minH={{ base: "44px", md: "auto" }}>
                   {group.orgao} ({group.total})
                 </Tabs.Trigger>
               ))}
@@ -127,6 +137,6 @@ export function FatoresUrbanosPanel({
           </Tabs.Root>
         </Stack>
       )}
-    </Box>
+    </BottomSheet>
   );
 }

@@ -172,9 +172,16 @@ A aplicação estará disponível em `http://localhost:3000`.
 | Variável | Descrição |
 |---|---|
 | `DATABASE_URL` | Connection string do Neon PostgreSQL |
-| `ANTHROPIC_API_KEY` | Chave de API da Anthropic |
+| `ANTHROPIC_API_KEY` | Chave de API da Anthropic (começa com `sk-ant-`) |
+| `ANTHROPIC_MODEL` | Opcional. Modelo usado pela IA (padrão: `claude-sonnet-5`) |
+| `NEXT_DIST_DIR` | Opcional. Pasta de build separada para testes (ex.: `.next-teste`) |
 
 Consulte `.env.example` para a lista completa.
+
+> **Dica de desenvolvimento:** use `npm run dev` no dia a dia (atualiza ao salvar). O `npm run start` só serve o último `npm run build`.
+> `dev` e `build` compartilham a pasta `.next`, então não rode um enquanto outro servidor Next estiver ativo neste projeto. Para testar em paralelo, use uma pasta separada:
+> `NEXT_DIST_DIR=.next-teste npx next dev -p 3001` (no PowerShell: `$env:NEXT_DIST_DIR=".next-teste"; npx next dev -p 3001`).
+> O Next acrescenta a pasta de teste ao `tsconfig.json` (`include`) sozinho; não comite essa alteração (`git checkout -- tsconfig.json`).
 
 ## Estrutura do Projeto
 

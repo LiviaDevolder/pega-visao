@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Button, Spinner } from "@chakra-ui/react";
+import { TOUCH_TARGET } from "@/lib/responsive";
 
 interface ReportButtonProps {
   areaFmId: number;
   areaName: string;
+  /** Largura total com área de toque de 44px (uso em cartões no celular). */
+  fullWidth?: boolean;
 }
 
-export function ReportButton({ areaFmId, areaName }: ReportButtonProps) {
+export function ReportButton({ areaFmId, areaName, fullWidth }: ReportButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
@@ -21,7 +24,7 @@ export function ReportButton({ areaFmId, areaName }: ReportButtonProps) {
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao gerar relatorio");
+        throw new Error("Erro ao gerar relatório");
       }
 
       const blob = await res.blob();
@@ -45,11 +48,13 @@ export function ReportButton({ areaFmId, areaName }: ReportButtonProps) {
   return (
     <Button
       size="sm"
+      w={fullWidth ? { base: "100%", md: "auto" } : undefined}
+      minH={fullWidth ? { base: TOUCH_TARGET, md: "auto" } : undefined}
       colorPalette="teal"
       onClick={handleGenerate}
       disabled={loading}
     >
-      {loading ? <Spinner size="xs" /> : "Gerar Relatorio"}
+      {loading ? <Spinner size="xs" /> : "Gerar Relatório"}
     </Button>
   );
 }

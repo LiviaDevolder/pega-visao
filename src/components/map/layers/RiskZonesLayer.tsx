@@ -84,11 +84,11 @@ export function RiskZonesLayer({ areas, onAreaClick }: RiskZonesLayerProps) {
               <br />
               Score: {area.risk_score.toFixed(2)}
               <br />
-              Ocorrencias: {area.ocorrencias_count.toLocaleString("pt-BR")}
+              Ocorrências: {area.ocorrencias_count.toLocaleString("pt-BR")}
               <br />
               Fatores: {area.fatores_count}
               <br />
-              Denuncias: {area.denuncias_count.toLocaleString("pt-BR")}
+              Denúncias: {area.denuncias_count.toLocaleString("pt-BR")}
             </Popup>
           </GeoJSON>
         );

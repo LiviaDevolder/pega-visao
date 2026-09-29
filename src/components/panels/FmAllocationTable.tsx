@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Badge, Text, Table } from "@chakra-ui/react";
+import { Box, Badge, HStack, Stack, Text, Table } from "@chakra-ui/react";
 import type { FmAllocation } from "@/lib/ai/prompts/fm-allocation";
 
 interface FmAllocationTableProps {
@@ -17,14 +17,15 @@ export function FmAllocationTable({ allocation }: FmAllocationTableProps) {
   const sorted = [...allocation].sort((a, b) => b.agentes - a.agentes);
 
   return (
-    <Box overflowX="auto">
+    <>
+    <Box display={{ base: "none", md: "block" }} overflowX="auto">
       <Table.Root size="sm">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader>Area FM</Table.ColumnHeader>
+            <Table.ColumnHeader>Área FM</Table.ColumnHeader>
             <Table.ColumnHeader>Agentes</Table.ColumnHeader>
             <Table.ColumnHeader>Modelo</Table.ColumnHeader>
-            <Table.ColumnHeader>Horarios</Table.ColumnHeader>
+            <Table.ColumnHeader>Horários</Table.ColumnHeader>
             <Table.ColumnHeader>Justificativa</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -62,5 +63,45 @@ export function FmAllocationTable({ allocation }: FmAllocationTableProps) {
         </Table.Body>
       </Table.Root>
     </Box>
+
+    {/* Celular: um cartão por área, sem coluna cortada nem justificativa truncada */}
+    <Stack gap={3} display={{ base: "flex", md: "none" }}>
+      {sorted.map((item, i) => (
+        <Box
+          key={i}
+          bg="white"
+          borderRadius="lg"
+          border="1px solid"
+          borderColor="gray.200"
+          p={3}
+        >
+          <Stack gap={2}>
+            <HStack justify="space-between" align="start" gap={3}>
+              <Text fontSize="sm" fontWeight="700" color="gray.800">
+                {item.area}
+              </Text>
+              <Badge colorPalette="blue" size="md" flexShrink={0}>
+                {item.agentes} agentes
+              </Badge>
+            </HStack>
+            <HStack gap={2} wrap="wrap">
+              <Badge
+                colorPalette={MODEL_COLORS[item.modelo_emprego] || "gray"}
+                size="sm"
+              >
+                {item.modelo_emprego}
+              </Badge>
+              <Text fontSize="xs" color="gray.700">
+                {item.horarios_prioridade}
+              </Text>
+            </HStack>
+            <Text fontSize="xs" color="gray.600">
+              {item.justificativa}
+            </Text>
+          </Stack>
+        </Box>
+      ))}
+    </Stack>
+    </>
   );
 }

@@ -28,9 +28,9 @@ export function buildFmAllocationPrompt(areas: FmAreaMetrics[]): string {
   return `Voce e um consultor tatico de seguranca publica do CompStat Municipal do Rio de Janeiro.
 
 ## Tarefa
-Distribua exatamente 600 agentes da Forca Municipal pelas 22 areas operacionais abaixo. A soma DEVE ser exatamente 600.
+Distribua exatamente 600 agentes da Forca Municipal pelas ${areas.length} areas operacionais abaixo. A soma DEVE ser exatamente 600.
 
-## Dados das 22 Areas FM
+## Dados das ${areas.length} Areas FM
 ${areasData}
 
 ## Regras
@@ -44,7 +44,7 @@ ${areasData}
 5. A justificativa deve ser concisa (1-2 frases) referenciando os dados
 
 ## Formato de Resposta
-Responda APENAS com um JSON array de 22 objetos:
+Responda APENAS com um JSON array de ${areas.length} objetos:
 [
   {
     "area": "nome da area",

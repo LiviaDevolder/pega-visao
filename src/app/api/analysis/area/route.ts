@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Dados insuficientes para gerar analise desta area. Nenhuma ocorrencia encontrada.",
+            "Dados insuficientes para gerar análise desta área. Nenhuma ocorrência encontrada.",
         },
         { status: 404 }
       );

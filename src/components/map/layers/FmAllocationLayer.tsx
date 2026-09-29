@@ -80,7 +80,7 @@ export function FmAllocationLayer({
               <br />
               Modelo: {item.modelo_emprego}
               <br />
-              Horarios: {item.horarios_prioridade}
+              Horários: {item.horarios_prioridade}
               <br />
               <em>{item.justificativa}</em>
             </Popup>

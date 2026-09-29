@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { AppShell } from "@/components/shell/AppShell";
+import { SplashScreen } from "@/components/shell/SplashScreen";
 
 export const metadata: Metadata = {
   title: "Pega Visão — Inteligência CompStat Rio",
@@ -22,9 +23,14 @@ export default function RootLayout({
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossOrigin=""
         />
+        {/* Toque no celular: os botões de zoom do Leaflet têm 30px, abaixo dos 44px recomendados */}
+        <style>{`@media (max-width: 767.98px) {
+  .leaflet-touch .leaflet-bar a { width: 44px !important; height: 44px !important; line-height: 44px !important; font-size: 22px; }
+}`}</style>
       </head>
       <body style={{ margin: 0, padding: 0 }}>
         <Providers>
+          <SplashScreen />
           <AppShell>{children}</AppShell>
         </Providers>
       </body>

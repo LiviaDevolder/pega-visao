@@ -86,7 +86,7 @@ export async function getFatoresByAreaFm(
       const orgaoMap = new Map<string, FatorComAcao[]>();
 
       for (const row of rows as Array<Record<string, unknown>>) {
-        const orgao = (row.orgao_responsavel as string) || "Nao definido";
+        const orgao = (row.orgao_responsavel as string) || "Não definido";
         const fatores = orgaoMap.get(orgao) || [];
         fatores.push({
           id: Number(row.id),

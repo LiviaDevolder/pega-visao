@@ -1,5 +1,6 @@
 "use client";
 
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { useState } from "react";
 import {
   Box,
@@ -41,7 +42,7 @@ const PERGUNTAS_NORTEADORAS: Array<{
   {
     key: "modelo_emprego",
     numero: 3,
-    titulo: "Dinamica criminal coincide com o modelo de emprego da FM?",
+    titulo: "Dinâmica criminal coincide com o modelo de emprego da FM?",
   },
   {
     key: "fatores_orgaos",
@@ -83,7 +84,7 @@ function PerguntaBlock({
       </Text>
       <Text fontSize="xs" color="gray.800">
         <Text as="span" fontWeight="semibold">
-          Sugestao:{" "}
+          Sugestão:{" "}
         </Text>
         {data.sugestao}
       </Text>
@@ -118,37 +119,31 @@ export function AreaAnalysisPanel({
       const result: AnalysisResponse = await res.json();
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao gerar analise");
+      setError(err instanceof Error ? err.message : "Erro ao gerar análise");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box
-      position="absolute"
-      right={4}
-      top={4}
-      bottom={4}
-      zIndex={1001}
-      bg="white"
-      borderRadius="lg"
-      p={5}
-      shadow="xl"
-      w="460px"
-      overflowY="auto"
+    <BottomSheet
+      title="Análise IA"
+      onClose={onClose}
+      desktop={{ right: 4, top: 4, bottom: 4, w: "460px", borderRadius: "lg" }}
     >
       <Box display="flex" justifyContent="space-between" alignItems="start">
         <Stack gap={1}>
-          <Badge colorPalette="purple" w="fit-content">
-            Analise IA
+          <Badge colorPalette="purple" w="fit-content" display={{ base: "none", md: "inline-flex" }}>
+            Análise IA
           </Badge>
           <Heading size="md">{areaName}</Heading>
         </Stack>
+        {/* No celular o botão de fechar fica na barra do BottomSheet */}
         <IconButton
           aria-label="Fechar"
           size="sm"
           variant="ghost"
+          display={{ base: "none", md: "inline-flex" }}
           onClick={onClose}
         >
           X
@@ -166,7 +161,7 @@ export function AreaAnalysisPanel({
             onClick={handleAnalyze}
             disabled={loading}
           >
-            Analisar Area
+            Analisar Área
           </Button>
         </Box>
       )}
@@ -175,7 +170,7 @@ export function AreaAnalysisPanel({
         <Box mt={8} textAlign="center">
           <Spinner size="lg" color="purple.500" />
           <Text mt={3} fontSize="sm" color="gray.500">
-            Cruzando mancha criminal, fatores urbanos e dinamica...
+            Cruzando mancha criminal, fatores urbanos e dinâmica...
           </Text>
         </Box>
       )}
@@ -185,7 +180,7 @@ export function AreaAnalysisPanel({
           <Text fontSize="sm" color="red.600">
             {error}
           </Text>
-          <Button size="sm" mt={2} onClick={handleAnalyze}>
+          <Button size={{ base: "md", md: "sm" }} minH={{ base: "44px", md: "auto" }} mt={2} onClick={handleAnalyze}>
             Tentar novamente
           </Button>
         </Box>
@@ -215,7 +210,7 @@ export function AreaAnalysisPanel({
 
           <Box>
             <Text fontWeight="bold" fontSize="sm" color="gray.700" mb={1}>
-              Dinamica Criminal
+              Dinâmica Criminal
             </Text>
             <Text fontSize="sm" color="gray.600" lineHeight="tall">
               {data.analysis.dinamica_criminal}
@@ -246,6 +241,6 @@ export function AreaAnalysisPanel({
           </Box>
         </Stack>
       )}
-    </Box>
+    </BottomSheet>
   );
 }

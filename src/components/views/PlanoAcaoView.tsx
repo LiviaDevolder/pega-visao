@@ -14,6 +14,10 @@ import {
 } from "@chakra-ui/react";
 import type { FatorUrbano } from "@/types/geo";
 import { getActionSuggestion } from "@/lib/action-plan-builder";
+import { TOUCH_TARGET, VIEW_HEIGHT } from "@/lib/responsive";
+
+// Itens exibidos por órgão de cada vez: renderizar as 2.085 ações de uma vez gera ~150.000px de página.
+const PAGE_SIZE = 20;
 
 interface OrgaoGroup {
   orgao: string;
@@ -25,6 +29,7 @@ export function PlanoAcaoView() {
   const [loading, setLoading] = useState(true);
   const [orgaoFilter, setOrgaoFilter] = useState<string>("");
   const [expandedOrgaos, setExpandedOrgaos] = useState<Set<string>>(new Set());
+  const [visibleCount, setVisibleCount] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetch("/api/geo/fatores-urbanos")
@@ -62,16 +67,22 @@ export function PlanoAcaoView() {
     });
   };
 
+  const showMore = (orgao: string, total: number, all = false) =>
+    setVisibleCount((prev) => ({
+      ...prev,
+      [orgao]: all ? total : (prev[orgao] ?? PAGE_SIZE) + PAGE_SIZE,
+    }));
+
   const expandAll = () => setExpandedOrgaos(new Set(filtered.map((g) => g.orgao)));
   const collapseAll = () => setExpandedOrgaos(new Set());
 
   return (
-    <Box minH="calc(100vh - 56px)" display="flex" flexDirection="column">
+    <Box minH={VIEW_HEIGHT} display="flex" flexDirection="column">
       <Box
         bg="white"
         borderBottom="1px solid"
         borderColor="gray.200"
-        px={6}
+        px={{ base: 4, md: 6 }}
         py={4}
       >
         <HStack justify="space-between" align="center" wrap="wrap" gap={4}>
@@ -85,12 +96,12 @@ export function PlanoAcaoView() {
             </Text>
           </Stack>
 
-          <HStack gap={4}>
+          <HStack gap={{ base: 2, md: 4 }} wrap="wrap" w={{ base: "100%", md: "auto" }}>
             <Badge colorPalette="blue" size="lg" p={2}>
               {totalAcoes} ações
             </Badge>
-            <Box minW="220px">
-              <NativeSelect.Root size="sm">
+            <Box minW={{ base: 0, md: "220px" }} flex={{ base: 1, md: "none" }}>
+              <NativeSelect.Root size={{ base: "lg", md: "sm" }}>
                 <NativeSelect.Field
                   value={orgaoFilter}
                   onChange={(e) => setOrgaoFilter(e.target.value)}
@@ -105,17 +116,17 @@ export function PlanoAcaoView() {
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
             </Box>
-            <Button size="xs" variant="outline" onClick={expandAll}>
+            <Button size={{ base: "md", md: "xs" }} minH={{ base: TOUCH_TARGET, md: "auto" }} flex={{ base: 1, md: "none" }} variant="outline" onClick={expandAll}>
               Expandir tudo
             </Button>
-            <Button size="xs" variant="outline" onClick={collapseAll}>
+            <Button size={{ base: "md", md: "xs" }} minH={{ base: TOUCH_TARGET, md: "auto" }} flex={{ base: 1, md: "none" }} variant="outline" onClick={collapseAll}>
               Recolher tudo
             </Button>
           </HStack>
         </HStack>
       </Box>
 
-      <Box flex={1} overflowY="auto" bg="gray.50" p={6}>
+      <Box flex={1} overflowY="auto" bg="gray.50" p={{ base: 3, md: 6 }}>
         {loading ? (
           <Box textAlign="center" py={12}>
             <Spinner size="lg" />
@@ -133,6 +144,9 @@ export function PlanoAcaoView() {
           <Stack gap={3} maxW="1100px" mx="auto">
             {filtered.map((group) => {
               const expanded = expandedOrgaos.has(group.orgao);
+              const shown = visibleCount[group.orgao] ?? PAGE_SIZE;
+              const visibleFatores = group.fatores.slice(0, shown);
+              const remaining = group.fatores.length - visibleFatores.length;
               return (
                 <Box
                   key={group.orgao}
@@ -143,8 +157,18 @@ export function PlanoAcaoView() {
                   overflow="hidden"
                 >
                   <HStack
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expanded}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleOrgao(group.orgao);
+                      }
+                    }}
                     px={4}
                     py={3}
+                    minH={{ base: TOUCH_TARGET, md: "auto" }}
                     bg="gray.50"
                     borderBottom={expanded ? "1px solid" : "none"}
                     borderColor="gray.200"
@@ -162,7 +186,7 @@ export function PlanoAcaoView() {
 
                   {expanded && (
                     <Stack gap={0} divideY="1px" divideColor="gray.100">
-                      {group.fatores.map((f) => (
+                      {visibleFatores.map((f) => (
                         <Box key={f.id} px={4} py={3}>
                           <Text fontSize="sm" fontWeight="600" color="gray.800">
                             {f.logradouro || "Local não informado"}
@@ -187,6 +211,35 @@ export function PlanoAcaoView() {
                           )}
                         </Box>
                       ))}
+                      {remaining > 0 && (
+                        <HStack px={4} py={3} gap={2} wrap="wrap" bg="gray.50">
+                          <Text fontSize="xs" color="gray.500" w="100%">
+                            Mostrando {visibleFatores.length} de {group.fatores.length}
+                          </Text>
+                          <Button
+                            size={{ base: "md", md: "sm" }}
+                            minH={{ base: TOUCH_TARGET, md: "auto" }}
+                            flex={{ base: 1, md: "none" }}
+                            variant="outline"
+                            onClick={() =>
+                              showMore(group.orgao, group.fatores.length)
+                            }
+                          >
+                            Mostrar mais {Math.min(PAGE_SIZE, remaining)}
+                          </Button>
+                          <Button
+                            size={{ base: "md", md: "sm" }}
+                            minH={{ base: TOUCH_TARGET, md: "auto" }}
+                            flex={{ base: 1, md: "none" }}
+                            variant="ghost"
+                            onClick={() =>
+                              showMore(group.orgao, group.fatores.length, true)
+                            }
+                          >
+                            Ver todas ({group.fatores.length})
+                          </Button>
+                        </HStack>
+                      )}
                     </Stack>
                   )}
                 </Box>
