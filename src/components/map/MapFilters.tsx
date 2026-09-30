@@ -1,6 +1,17 @@
 "use client";
 
-import { Box, Stack, Text, Input, HStack, IconButton } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  CloseButton,
+  Drawer,
+  HStack,
+  IconButton,
+  Input,
+  Portal,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { NativeSelect } from "@chakra-ui/react";
 import { TOUCH_TARGET, Z_INDEX } from "@/lib/responsive";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
@@ -35,6 +46,144 @@ export function MapFiltersPanel({
   onCollapsedChange,
 }: MapFiltersPanelProps) {
   const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeCount = [filters.dia_semana, filters.hora_inicio, filters.hora_fim].filter(
+      (v) => v !== undefined && v !== ""
+    ).length;
+
+    return (
+      <>
+        {/* left maior que no desktop: afasta o chip do controle de zoom do Leaflet */}
+        <Button
+          position="absolute"
+          top={4}
+          left="72px"
+          zIndex={Z_INDEX.mapOverlay}
+          bg="white"
+          color="gray.700"
+          shadow="lg"
+          size="md"
+          minH={TOUCH_TARGET}
+          fontWeight="bold"
+          aria-label="Abrir filtros de horário"
+          onClick={() => onCollapsedChange(false)}
+        >
+          ⏱ Horário{activeCount > 0 ? ` (${activeCount})` : ""}
+        </Button>
+
+        <Drawer.Root
+          open={!collapsed}
+          onOpenChange={(e) => onCollapsedChange(!e.open)}
+          placement="bottom"
+        >
+          <Portal>
+            <Drawer.Backdrop />
+            <Drawer.Positioner>
+              <Drawer.Content borderTopRadius="xl">
+                <Drawer.Header>
+                  <Drawer.Title fontSize="md" color="#0A2E5C">
+                    Filtros Temporais
+                  </Drawer.Title>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <Stack gap={4}>
+                    <Box>
+                      <Text fontSize="sm" color="gray.500" mb={1}>
+                        Dia da Semana
+                      </Text>
+                      <NativeSelect.Root size="lg">
+                        <NativeSelect.Field
+                          value={filters.dia_semana || ""}
+                          onChange={(e) =>
+                            onFilterChange({
+                              ...filters,
+                              dia_semana: e.target.value || undefined,
+                            })
+                          }
+                        >
+                          <option value="">Todos</option>
+                          {DIAS_SEMANA.map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Box>
+
+                    <Box>
+                      <Text fontSize="sm" color="gray.500" mb={1}>
+                        Faixa Horária
+                      </Text>
+                      <HStack gap={2}>
+                        <Input
+                          size="lg"
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          max={23}
+                          placeholder="De"
+                          value={filters.hora_inicio ?? ""}
+                          onChange={(e) =>
+                            onFilterChange({
+                              ...filters,
+                              hora_inicio: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                        />
+                        <Text>-</Text>
+                        <Input
+                          size="lg"
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          max={23}
+                          placeholder="Até"
+                          value={filters.hora_fim ?? ""}
+                          onChange={(e) =>
+                            onFilterChange({
+                              ...filters,
+                              hora_fim: e.target.value ? Number(e.target.value) : undefined,
+                            })
+                          }
+                        />
+                      </HStack>
+                    </Box>
+                  </Stack>
+                </Drawer.Body>
+                <Drawer.Footer gap={2}>
+                  {activeCount > 0 && (
+                    <Button
+                      variant="outline"
+                      minH={TOUCH_TARGET}
+                      flex={1}
+                      onClick={() => onFilterChange({})}
+                    >
+                      Limpar
+                    </Button>
+                  )}
+                  <Button
+                    colorPalette="blue"
+                    minH={TOUCH_TARGET}
+                    flex={1}
+                    onClick={() => onCollapsedChange(true)}
+                  >
+                    Aplicar
+                  </Button>
+                </Drawer.Footer>
+                <Drawer.CloseTrigger asChild>
+                  <CloseButton size="lg" position="absolute" top={3} right={3} />
+                </Drawer.CloseTrigger>
+              </Drawer.Content>
+            </Drawer.Positioner>
+          </Portal>
+        </Drawer.Root>
+      </>
+    );
+  }
+
   return (
     <Box
       position="absolute"

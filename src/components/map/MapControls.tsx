@@ -1,6 +1,17 @@
 "use client";
 
-import { Box, Stack, Text, Spinner, HStack, IconButton } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  CloseButton,
+  Drawer,
+  HStack,
+  IconButton,
+  Portal,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { Switch } from "@chakra-ui/react";
 import { TOUCH_TARGET, Z_INDEX } from "@/lib/responsive";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
@@ -43,6 +54,92 @@ export function MapControls({
   onCollapsedChange,
 }: MapControlsProps) {
   const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <>
+        <Button
+          position="absolute"
+          top={4}
+          right={4}
+          zIndex={Z_INDEX.mapOverlay}
+          bg="white"
+          color="gray.700"
+          shadow="lg"
+          size="md"
+          minH={TOUCH_TARGET}
+          fontWeight="bold"
+          aria-label="Abrir camadas"
+          onClick={() => onCollapsedChange(false)}
+        >
+          ☰ Camadas
+        </Button>
+
+        <Drawer.Root
+          open={!collapsed}
+          onOpenChange={(e) => onCollapsedChange(!e.open)}
+          placement="bottom"
+        >
+          <Portal>
+            <Drawer.Backdrop />
+            <Drawer.Positioner>
+              <Drawer.Content borderTopRadius="xl">
+                <Drawer.Header>
+                  <Drawer.Title fontSize="md" color="#0A2E5C">
+                    Camadas
+                    {loading && <Spinner size="xs" ml={2} />}
+                  </Drawer.Title>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <Stack gap={1}>
+                    {(Object.keys(LAYER_LABELS) as MapLayerKey[]).map((layer) => (
+                      <Box
+                        key={layer}
+                        as="label"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        minH={TOUCH_TARGET}
+                      >
+                        <Text fontSize="md" color="gray.700">
+                          {LAYER_LABELS[layer]}
+                        </Text>
+                        <Switch.Root
+                          checked={layers[layer]}
+                          onCheckedChange={() => onToggle(layer)}
+                          colorPalette={LAYER_COLORS[layer]}
+                          size="lg"
+                        >
+                          <Switch.HiddenInput />
+                          <Switch.Control>
+                            <Switch.Thumb />
+                          </Switch.Control>
+                        </Switch.Root>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Drawer.Body>
+                <Drawer.Footer>
+                  <Button
+                    colorPalette="blue"
+                    minH={TOUCH_TARGET}
+                    flex={1}
+                    onClick={() => onCollapsedChange(true)}
+                  >
+                    Concluir
+                  </Button>
+                </Drawer.Footer>
+                <Drawer.CloseTrigger asChild>
+                  <CloseButton size="lg" position="absolute" top={3} right={3} />
+                </Drawer.CloseTrigger>
+              </Drawer.Content>
+            </Drawer.Positioner>
+          </Portal>
+        </Drawer.Root>
+      </>
+    );
+  }
+
   return (
     <Box
       position="absolute"

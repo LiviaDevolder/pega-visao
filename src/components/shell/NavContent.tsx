@@ -43,11 +43,11 @@ export function BrandLogo() {
   );
 }
 
-export function NavList({ onNavigate }: { onNavigate?: () => void }) {
+export function NavList({ onNavigate, large = false }: { onNavigate?: () => void; large?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <Stack as="ul" gap={1} p={2} m={0} listStyleType="none">
+    <Stack as="ul" gap={large ? 2 : 1} p={large ? 4 : 2} m={0} listStyleType="none">
       {NAV_ITEMS.map((item) => {
         const active = pathname === item.href;
         return (
@@ -61,7 +61,7 @@ export function NavList({ onNavigate }: { onNavigate?: () => void }) {
               <HStack
                 gap={3}
                 px={3}
-                py={2.5}
+                py={large ? 4 : 2.5}
                 minH={{ base: TOUCH_TARGET, md: "auto" }}
                 borderRadius="md"
                 bg={active ? "#0A2E5C" : "transparent"}
@@ -69,10 +69,10 @@ export function NavList({ onNavigate }: { onNavigate?: () => void }) {
                 _hover={active ? {} : { bg: "gray.100" }}
                 transition="background 0.15s"
               >
-                <Text fontSize="lg" lineHeight="1">
+                <Text fontSize={large ? "2xl" : "lg"} lineHeight="1">
                   {item.icon}
                 </Text>
-                <Text fontSize="sm" fontWeight={active ? "600" : "500"}>
+                <Text fontSize={large ? "lg" : "sm"} fontWeight={active ? "600" : "500"}>
                   {item.label}
                 </Text>
               </HStack>
