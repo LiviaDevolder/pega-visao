@@ -52,17 +52,13 @@ export function MapView() {
   const [loading, setLoading] = useState(true);
   const [layerLoading, setLayerLoading] = useState(0);
 
-  // Desktop: os dois painéis começam abertos e são independentes.
-  // Celular: começam recolhidos e só um fica aberto por vez, para não cobrirem o mapa nem um ao outro.
   const isMobile = useIsMobile();
-  const [layersCollapsed, setLayersCollapsed] = useState(false);
-  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+  const [layersCollapsed, setLayersCollapsed] = useState(true);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true);
 
   useEffect(() => {
-    if (isMobile) {
-      setLayersCollapsed(true);
-      setFiltersCollapsed(true);
-    }
+    setLayersCollapsed(isMobile);
+    setFiltersCollapsed(isMobile);
   }, [isMobile]);
 
   const handleLayersCollapsed = (collapsed: boolean) => {
@@ -91,7 +87,7 @@ export function MapView() {
     setHeatPoints(data);
   }, [globalFilters, localFilters]);
 
-  // As áreas FM são a base do mapa e carregam de imediato.
+ 
   useEffect(() => {
     async function loadAreas() {
       setLoading(true);
@@ -107,9 +103,6 @@ export function MapView() {
 
     loadAreas();
   }, []);
-
-  // Fatores urbanos (~530 KB) e câmeras (~190 KB) começam desligados: só são
-  // baixados na primeira vez que a camada é ligada.
   const fatoresRequested = useRef(false);
   const camerasRequested = useRef(false);
 

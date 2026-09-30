@@ -28,7 +28,7 @@ export function MobileNav() {
         open={open}
         onOpenChange={(e) => setOpen(e.open)}
         placement="start"
-        size="xs"
+        size="full"
       >
         <Portal>
           <Drawer.Backdrop />
@@ -43,7 +43,7 @@ export function MobileNav() {
               </Drawer.Header>
               <Drawer.Body p={0}>
                 <nav aria-label="Navegação principal">
-                  <NavList onNavigate={() => setOpen(false)} />
+                  <NavList large onNavigate={() => setOpen(false)} />
                 </nav>
               </Drawer.Body>
               <Drawer.CloseTrigger asChild>
