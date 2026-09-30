@@ -103,7 +103,6 @@ export function MapView() {
 
     loadAreas();
   }, []);
-s
   const fatoresRequested = useRef(false);
   const camerasRequested = useRef(false);
 
